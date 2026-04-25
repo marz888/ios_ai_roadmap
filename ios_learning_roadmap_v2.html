@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080c14">
+<title>iOS & AI Learning Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #080c14;
+    --surface: #0d1420;
+    --surface2: #121a2e;
+    --border: #1e2d4a;
+    --border2: #243554;
+    --text: #e8edf5;
+    --text2: #8a9bc0;
+    --text3: #4a5a7a;
+    --accent: #4ade80;
+    --accent2: #60a5fa;
+    --accent3: #a78bfa;
+    --accent4: #fbbf24;
+    --red: #f87171;
+    --orange: #fb923c;
+    --glow: rgba(74, 222, 128, 0.15);
+    --font-mono: 'Space Mono', monospace;
+    --font-display: 'Syne', sans-serif;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    padding-top: var(--safe-top);
+    padding-bottom: calc(var(--safe-bottom) + 80px);
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(96, 165, 250, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(96, 165, 250, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(8, 12, 20, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+
+  .header-inner {
+    max-width: 720px; margin: 0 auto;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 16px; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+  }
+
+  .header-right {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .sync-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--text3);
+    letter-spacing: 1px;
+  }
+
+  .sync-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  .sync-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); animation: none; }
+  .sync-dot.syncing { background: var(--accent4); box-shadow: 0 0 6px var(--accent4); }
+
+  .settings-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px;
+    color: var(--text2); font-size: 12px; cursor: pointer;
+    font-family: var(--font-mono);
+    transition: all 0.2s;
+  }
+
+  .settings-btn:active { background: var(--border); }
+
+  /* ── PROGRESS HERO ── */
+  .hero {
+    max-width: 720px; margin: 0 auto;
+    padding: 24px 20px 0;
+    position: relative; z-index: 1;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 800; line-height: 1.15;
+    margin-bottom: 4px;
+  }
+
+  .hero-title span {
+    background: linear-gradient(135deg, var(--accent2), var(--accent3), var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 11px; color: var(--text3);
+    letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  /* Progress ring */
+  .progress-section {
+    display: flex; gap: 16px; align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+
+  .progress-ring-wrap { flex-shrink: 0; position: relative; }
+
+  .progress-ring-wrap svg { transform: rotate(-90deg); }
+
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+  .ring-fg {
+    fill: none; stroke-width: 6;
+    stroke: url(#ringGrad);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  .ring-pct {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: 800;
+    color: var(--accent);
+  }
+
+  .ring-total { font-size: 9px; color: var(--text3); }
+
+  .progress-stats { flex: 1; }
+
+  .stat-row {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 10px;
+  }
+
+  .stat-label { font-size: 10px; color: var(--text3); letter-spacing: 1px; }
+
+  .stat-bar-wrap {
+    background: var(--border);
+    border-radius: 99px; height: 4px;
+    overflow: hidden; margin-top: 4px;
+  }
+
+  .stat-bar {
+    height: 100%; border-radius: 99px;
+    transition: width 0.6s ease;
+  }
+
+  .stat-val {
+    font-size: 11px; font-weight: 700;
+  }
+
+  /* ── FILTERS ── */
+  .filters {
+    max-width: 720px; margin: 0 auto;
+    padding: 0 20px 16px;
+    position: relative; z-index: 1;
+  }
+
+  .filter-scroll {
+    display: flex; gap: 8px;
+    overflow-x: auto; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filter-scroll::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    flex-shrink: 0;
+    padding: 6px 14px; border-radius: 99px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 1px; cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text3);
+    transition: all 0.2s;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .filter-chip.active {
+    border-color: var(--accent);
+    background: rgba(74, 222, 128, 0.1);
+    color: var(--accent);
+  }
+
+  /* ── CONTENT ── */
+  .content {
+    max-width: 720px; margin: 0 auto;
+    padding: 0 20px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── WEEK BLOCK ── */
+  .week-block { margin-bottom: 12px; }
+
+  .week-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    cursor: pointer; width: 100%;
+    font-family: var(--font-mono);
+    color: var(--text);
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .week-header.open { border-color: var(--border2); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+  .week-header:active { opacity: 0.8; }
+
+  .week-left { display: flex; align-items: center; gap: 12px; }
+
+  .week-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+
+  .week-title {
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: 700;
+  }
+
+  .week-dates { font-size: 10px; color: var(--text3); }
+
+  .week-right { display: flex; align-items: center; gap: 10px; }
+
+  .week-count { font-size: 11px; color: var(--text2); }
+
+  .week-chevron {
+    font-size: 10px; color: var(--text3);
+    transition: transform 0.25s;
+    display: inline-block;
+  }
+
+  .week-chevron.open { transform: rotate(180deg); }
+
+  /* ── DAYS CONTAINER ── */
+  .days-container {
+    border: 1px solid var(--border2);
+    border-top: none;
+    border-bottom-left-radius: 14px;
+    border-bottom-right-radius: 14px;
+    overflow: hidden;
+    display: none;
+  }
+
+  .days-container.open { display: block; }
+
+  /* ── DAY BLOCK ── */
+  .day-block { border-bottom: 1px solid var(--border); }
+  .day-block:last-child { border-bottom: none; }
+
+  .day-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px; cursor: pointer;
+    background: var(--surface2);
+    font-family: var(--font-mono);
+    color: var(--text);
+    width: 100%;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s;
+  }
+
+  .day-header:active { background: var(--border); }
+  .day-header.complete { background: rgba(74, 222, 128, 0.05); }
+
+  .day-left { display: flex; align-items: center; gap: 10px; }
+
+  .day-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 10px;
+    transition: all 0.3s;
+  }
+
+  .day-check.done { border-color: var(--accent); background: var(--accent); color: #080c14; }
+
+  .day-label {
+    font-family: var(--font-display);
+    font-size: 13px; font-weight: 700;
+  }
+
+  .day-date { font-size: 10px; color: var(--text3); }
+
+  .day-right { display: flex; align-items: center; gap: 8px; }
+
+  .day-progress { font-size: 10px; color: var(--text3); }
+
+  /* ── TASKS ── */
+  .tasks-wrap { padding: 8px 12px 12px; background: var(--bg); }
+
+  .task-item {
+    display: flex; gap: 12px;
+    padding: 12px 14px; margin-bottom: 6px;
+    border-radius: 10px; cursor: pointer;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    align-items: flex-start;
+  }
+
+  .task-item:last-child { margin-bottom: 0; }
+  .task-item:active { transform: scale(0.99); }
+  .task-item.done { background: rgba(74, 222, 128, 0.04); border-color: rgba(74, 222, 128, 0.15); opacity: 0.65; }
+
+  .task-checkbox {
+    width: 20px; height: 20px; border-radius: 5px;
+    border: 2px solid var(--border2);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    transition: all 0.2s;
+    font-size: 11px; font-weight: 700; color: var(--bg);
+  }
+
+  .task-item.done .task-checkbox {
+    background: var(--accent); border-color: var(--accent);
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-meta {
+    display: flex; gap: 8px; align-items: center;
+    flex-wrap: wrap; margin-bottom: 5px;
+  }
+
+  .task-tag {
+    font-size: 9px; padding: 2px 8px;
+    border-radius: 99px; letter-spacing: 0.5px;
+    font-weight: 700; flex-shrink: 0;
+  }
+
+  .tag-Typing   { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+  .tag-Python   { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+  .tag-AI       { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+  .tag-Swift    { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+  .tag-PyTorch  { background: rgba(251,191,36,0.12); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+  .tag-Review   { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.15); }
+
+  .task-time { font-size: 9px; color: var(--text3); }
+
+  .task-text {
+    font-size: 13px; line-height: 1.5;
+    color: var(--text); margin-bottom: 6px;
+  }
+
+  .task-item.done .task-text {
+    text-decoration: line-through; color: var(--text3);
+  }
+
+  .task-resource {
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  .task-resource a {
+    font-size: 10px; color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(96,165,250,0.3);
+    transition: color 0.2s;
+    word-break: break-all;
+  }
+
+  .task-resource a:hover { color: #93c5fd; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 200;
+    background: rgba(8, 12, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px calc(10px + var(--safe-bottom));
+    display: flex; justify-content: center; gap: 8px;
+  }
+
+  .nav-btn {
+    flex: 1; max-width: 160px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 10px 8px;
+    color: var(--text2); font-family: var(--font-mono);
+    font-size: 10px; letter-spacing: 1px;
+    cursor: pointer; text-align: center;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-btn .nav-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+  .nav-btn.active { background: rgba(74,222,128,0.1); border-color: var(--accent); color: var(--accent); }
+  .nav-btn:active { transform: scale(0.96); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: calc(80px + var(--safe-bottom) + 10px);
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 10px; padding: 10px 18px;
+    font-size: 12px; color: var(--text);
+    opacity: 0; transition: all 0.3s;
+    pointer-events: none; z-index: 300;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .week-block { animation: fadeIn 0.3s ease both; }
+
+  /* ── SETTINGS PANEL ── */
+  .panel-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 400; display: none;
+    backdrop-filter: blur(4px);
+  }
+
+  .panel-overlay.open { display: block; }
+
+  .panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 24px calc(20px + var(--safe-bottom));
+    z-index: 401;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .panel-overlay.open .panel { transform: translateY(0); }
+
+  .panel-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--border2); margin: 0 auto 20px;
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 18px; font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .panel-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-row:last-child { border-bottom: none; }
+
+  .panel-row-label { font-size: 13px; color: var(--text); }
+  .panel-row-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  .panel-btn {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 8px 14px;
+    color: var(--text2); font-family: var(--font-mono);
+    font-size: 11px; cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .panel-btn.danger { color: var(--red); border-color: rgba(248,113,113,0.3); }
+  .panel-btn:active { opacity: 0.7; }
+
+  /* ── NOTES ── */
+  .task-note-wrap {
+    margin-top: 8px;
+    position: relative;
+  }
+
+  .task-note-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 7px 38px 7px 10px;
+    color: var(--text2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: none;
+    height: 34px;
+    line-height: 1.4;
+  }
+
+  .task-note-input::placeholder { color: var(--text3); }
+  .task-note-input:focus { border-color: var(--accent2); color: var(--text); }
+
+  .task-note-count {
+    position: absolute; right: 8px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 9px; color: var(--text3);
+    pointer-events: none;
+  }
+
+  .task-note-count.warn { color: var(--orange); }
+  .task-note-count.over { color: var(--red); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .week-dates { display: none; }
+    .hero-title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo">iOS & AI Roadmap</div>
+    <div class="header-right">
+      <div class="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">LIVE</span>
+      </div>
+      <button class="settings-btn" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-title"><span>Phase 1</span> — Foundations</div>
+  <div class="hero-sub">Thu 28 May – Wed 24 Jun 2026 · 5 days/week</div>
+
+  <div class="progress-section">
+    <div class="progress-ring-wrap">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="100%" stop-color="#4ade80"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="40" cy="40" r="34"/>
+        <circle class="ring-fg" id="ring-fg" cx="40" cy="40" r="34"
+          stroke-dasharray="213.6"
+          stroke-dashoffset="213.6"/>
+      </svg>
+      <div class="ring-label">
+        <span class="ring-pct" id="ring-pct">0%</span>
+        <span class="ring-total" id="ring-total">0/80</span>
+      </div>
+    </div>
+
+    <div class="progress-stats" style="flex:1">
+      <div class="stat-row">
+        <span class="stat-label">TODAY</span>
+        <span class="stat-val" id="stat-today" style="color:var(--accent2)">0/4</span>
+      </div>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar" id="bar-today" style="width:0%;background:var(--accent2)"></div>
+      </div>
+      <div style="margin-top:10px"></div>
+      <div class="stat-row">
+        <span class="stat-label">THIS WEEK</span>
+        <span class="stat-val" id="stat-week" style="color:var(--accent3)">0/20</span>
+      </div>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar" id="bar-week" style="width:0%;background:var(--accent3)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <div class="filter-scroll">
+    <button class="filter-chip active" onclick="setFilter('All',this)">All</button>
+    <button class="filter-chip" onclick="setFilter('Typing',this)">⌨ Typing</button>
+    <button class="filter-chip" onclick="setFilter('Swift',this)">🍎 Swift</button>
+    <button class="filter-chip" onclick="setFilter('AI',this)">🧠 AI</button>
+    <button class="filter-chip" onclick="setFilter('PyTorch',this)">🔥 PyTorch</button>
+    <button class="filter-chip" onclick="setFilter('Python',this)">🐍 Python</button>
+    <button class="filter-chip" onclick="setFilter('Review',this)">📝 Review</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="main-content"></div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-checklist">
+    <span class="nav-icon">☑</span>CHECKLIST
+  </button>
+  <button class="nav-btn" id="nav-streak" onclick="showToast('Streak tracker coming in Phase 2! 🔥')">
+    <span class="nav-icon">🔥</span>STREAK
+  </button>
+  <button class="nav-btn" id="nav-resources" onclick="showToast('Resource library coming soon 📚')">
+    <span class="nav-icon">📚</span>RESOURCES
+  </button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SETTINGS PANEL -->
+<div class="panel-overlay" id="settings-overlay" onclick="closeSettings(event)">
+  <div class="panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title">Settings</div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Connected as</div>
+        <div class="panel-row-sub" id="settings-user">—</div>
+      </div>
+      <button class="panel-btn" onclick="reconnect()">Change</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Sync status</div>
+        <div class="panel-row-sub" id="settings-sync">—</div>
+      </div>
+      <button class="panel-btn" onclick="forceSync()">Sync now</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Reset all progress</div>
+        <div class="panel-row-sub">Cannot be undone</div>
+      </div>
+      <button class="panel-btn danger" onclick="resetProgress()">Reset</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Phase 2–4</div>
+        <div class="panel-row-sub">Coming soon</div>
+      </div>
+      <button class="panel-btn" onclick="showToast('Phases 2–4 coming soon! 🚀')">Preview</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const PHASES = [{
+  id: 1, title: "Phase 1 — Foundations", color: "#4ade80",
+  weeks: [
+    { week: 1, days: [
+      { date: "Thu 28 May 2026", label: "Day 1", tasks: [
+        { id:"1-1-1", time:"Morning 15min", text:"Keybr.com — home row keys (A S D F J K L)", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"1-1-2", time:"Mid-morning 2.5hrs", text:"Python refresh: lists, dicts, lambda functions", resource:"Coursera: Python for Everybody", url:"https://www.coursera.org/learn/python", tag:"Python" },
+        { id:"1-1-3", time:"Afternoon 2hrs", text:"Coursera: AI For Everyone — Chapter 1: What is AI?", resource:"Coursera: AI For Everyone — Andrew Ng", url:"https://www.coursera.org/learn/ai-for-everyone", tag:"AI" },
+        { id:"1-1-4", time:"Evening 15min", text:"TypeRacer.com — first race, note your WPM", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Fri 29 May 2026", label: "Day 2", tasks: [
+        { id:"1-2-1", time:"Morning 15min", text:"Keybr.com — home row, focus on accuracy not speed", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"1-2-2", time:"Mid-morning 2.5hrs", text:"Python refresh: classes, OOP basics, file I/O", resource:"Coursera: Python for Everybody", url:"https://www.coursera.org/learn/python", tag:"Python" },
+        { id:"1-2-3", time:"Afternoon 2hrs", text:"Coursera: AI For Everyone — Chapter 2: Building AI Projects", resource:"Coursera: AI For Everyone — Andrew Ng", url:"https://www.coursera.org/learn/ai-for-everyone", tag:"AI" },
+        { id:"1-2-4", time:"Evening 15min", text:"TypeRacer.com — 3 races, track improvement", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Mon 1 Jun 2026", label: "Day 3", tasks: [
+        { id:"1-3-1", time:"Morning 15min", text:"Keybr.com — introduce top row keys", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"1-3-2", time:"Mid-morning 2.5hrs", text:"Install Anaconda, setup Jupyter notebook, intro to NumPy", resource:"Anaconda — free download", url:"https://www.anaconda.com/download", tag:"Python" },
+        { id:"1-3-3", time:"Afternoon 2hrs", text:"Coursera: AI For Everyone — Chapter 3: AI and Society", resource:"Coursera: AI For Everyone — Andrew Ng", url:"https://www.coursera.org/learn/ai-for-everyone", tag:"AI" },
+        { id:"1-3-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Tue 2 Jun 2026", label: "Day 4", tasks: [
+        { id:"1-4-1", time:"Morning 15min", text:"Keybr.com — top row practice", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"1-4-2", time:"Mid-morning 2.5hrs", text:"Swift: Install Xcode, read Swift Tour on swift.org", resource:"swift.org — A Swift Tour", url:"https://docs.swift.org/swift-book/documentation/the-swift-programming-language/guidedtour/", tag:"Swift" },
+        { id:"1-4-3", time:"Afternoon 2hrs", text:"Swift: Variables, constants, types, string interpolation", resource:"Coursera: iOS App Dev with Swift", url:"https://www.coursera.org/learn/swift-5-ios-app-developer-specialization", tag:"Swift" },
+        { id:"1-4-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Wed 3 Jun 2026", label: "Day 5", tasks: [
+        { id:"1-5-1", time:"Morning 15min", text:"Keybr.com — review all keys so far", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"1-5-2", time:"Mid-morning 2.5hrs", text:"Swift: Optionals, if-let, guard statements", resource:"YouTube: Sean Allen — Swift for Beginners", url:"https://www.youtube.com/@seanallen", tag:"Swift" },
+        { id:"1-5-3", time:"Afternoon 2hrs", text:"ML Specialization Week 1: What is machine learning?", resource:"Coursera: Machine Learning Specialization", url:"https://www.coursera.org/specializations/machine-learning-introduction", tag:"AI" },
+        { id:"1-5-4", time:"Evening 15min", text:"TypeRacer.com — note end of week WPM", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+    ]},
+    { week: 2, days: [
+      { date: "Thu 4 Jun 2026", label: "Day 6", tasks: [
+        { id:"2-1-1", time:"Morning 15min", text:"Keybr.com — bottom row keys (Z X C V B N M)", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"2-1-2", time:"Mid-morning 2.5hrs", text:"Swift: Functions, closures, higher-order functions", resource:"100 Days of SwiftUI — Day 1–5", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"2-1-3", time:"Afternoon 2hrs", text:"ML Specialization: Linear regression, cost function", resource:"Coursera: Machine Learning Specialization", url:"https://www.coursera.org/specializations/machine-learning-introduction", tag:"AI" },
+        { id:"2-1-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Fri 5 Jun 2026", label: "Day 7", tasks: [
+        { id:"2-2-1", time:"Morning 15min", text:"Keybr.com — full keyboard practice", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"2-2-2", time:"Mid-morning 2.5hrs", text:"Swift: Structs, classes, properties, methods", resource:"100 Days of SwiftUI — Day 6–10", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"2-2-3", time:"Afternoon 2hrs", text:"ML Specialization: Gradient descent explained", resource:"Coursera: Machine Learning Specialization", url:"https://www.coursera.org/specializations/machine-learning-introduction", tag:"AI" },
+        { id:"2-2-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Mon 8 Jun 2026", label: "Day 8", tasks: [
+        { id:"2-3-1", time:"Morning 15min", text:"Keybr.com — speed drill, full keyboard", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"2-3-2", time:"Mid-morning 2.5hrs", text:"Swift: Arrays, dictionaries, sets, for loops", resource:"100 Days of SwiftUI — Day 11–15", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"2-3-3", time:"Afternoon 2hrs", text:"Start Calculator app: Create Xcode project, basic UI layout", resource:"YouTube: Sean Allen — Build a Calculator in SwiftUI", url:"https://www.youtube.com/@seanallen", tag:"Swift" },
+        { id:"2-3-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Tue 9 Jun 2026", label: "Day 9", tasks: [
+        { id:"2-4-1", time:"Morning 15min", text:"Keybr.com — focus on weak keys from yesterday", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"2-4-2", time:"Mid-morning 2.5hrs", text:"ML Specialization: Multiple linear regression, vectorisation", resource:"Coursera: Machine Learning Specialization", url:"https://www.coursera.org/specializations/machine-learning-introduction", tag:"AI" },
+        { id:"2-4-3", time:"Afternoon 2hrs", text:"Calculator app: Add buttons grid, @State for display", resource:"Apple Developer Docs: SwiftUI State", url:"https://developer.apple.com/documentation/swiftui/state", tag:"Swift" },
+        { id:"2-4-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Wed 10 Jun 2026", label: "Day 10", tasks: [
+        { id:"2-5-1", time:"Morning 15min", text:"Keybr.com — aim for personal best today", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"2-5-2", time:"Mid-morning 2.5hrs", text:"ML Specialization: Classification, logistic regression", resource:"Coursera: Machine Learning Specialization", url:"https://www.coursera.org/specializations/machine-learning-introduction", tag:"AI" },
+        { id:"2-5-3", time:"Afternoon 2hrs", text:"Calculator app: Add arithmetic logic, polish UI", resource:"YouTube: Sean Allen — SwiftUI Calculator", url:"https://www.youtube.com/@seanallen", tag:"Swift" },
+        { id:"2-5-4", time:"Evening 15min", text:"TypeRacer.com — note WPM progress vs week 1", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+    ]},
+    { week: 3, days: [
+      { date: "Thu 11 Jun 2026", label: "Day 11", tasks: [
+        { id:"3-1-1", time:"Morning 15min", text:"Keybr.com — number row introduction", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"3-1-2", time:"Mid-morning 2.5hrs", text:"Swift: Protocols, extensions, error handling", resource:"100 Days of SwiftUI — Day 16–20", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"3-1-3", time:"Afternoon 2hrs", text:"ML Specialization: Decision trees, overfitting, regularisation", resource:"Coursera: Machine Learning Specialization", url:"https://www.coursera.org/specializations/machine-learning-introduction", tag:"AI" },
+        { id:"3-1-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Fri 12 Jun 2026", label: "Day 12", tasks: [
+        { id:"3-2-1", time:"Morning 15min", text:"Keybr.com — symbols and punctuation", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"3-2-2", time:"Mid-morning 2.5hrs", text:"Swift: SwiftUI views, VStack, HStack, ZStack, Text, Image", resource:"100 Days of SwiftUI — Day 21–25", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"3-2-3", time:"Afternoon 2hrs", text:"PyTorch: Install PyTorch in Jupyter, tensors intro", resource:"PyTorch — Getting Started Tutorials", url:"https://pytorch.org/tutorials/beginner/basics/intro.html", tag:"PyTorch" },
+        { id:"3-2-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Mon 15 Jun 2026", label: "Day 13", tasks: [
+        { id:"3-3-1", time:"Morning 15min", text:"Keybr.com — full keyboard including numbers", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"3-3-2", time:"Mid-morning 2.5hrs", text:"Swift: Buttons, TextField, @State, @Binding", resource:"Apple Developer — SwiftUI Tutorials", url:"https://developer.apple.com/tutorials/swiftui", tag:"Swift" },
+        { id:"3-3-3", time:"Afternoon 2hrs", text:"PyTorch: Tensor operations, reshaping, basic maths", resource:"YouTube: Daniel Bourke — PyTorch for Deep Learning Ch1", url:"https://www.youtube.com/@mrdbourke", tag:"PyTorch" },
+        { id:"3-3-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Tue 16 Jun 2026", label: "Day 14", tasks: [
+        { id:"3-4-1", time:"Morning 15min", text:"Keybr.com — accuracy focus, slow down if needed", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"3-4-2", time:"Mid-morning 2.5hrs", text:"Deep Learning Specialization: Neural network intuition", resource:"Coursera: Deep Learning Specialization — Course 1 Week 1", url:"https://www.coursera.org/specializations/deep-learning", tag:"AI" },
+        { id:"3-4-3", time:"Afternoon 2hrs", text:"Swift: Navigation, NavigationStack, passing data between views", resource:"100 Days of SwiftUI — Day 26–30", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"3-4-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Wed 17 Jun 2026", label: "Day 15", tasks: [
+        { id:"3-5-1", time:"Morning 15min", text:"Keybr.com — aim for 35 WPM personal best", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"3-5-2", time:"Mid-morning 2.5hrs", text:"Deep Learning Specialization: Forward propagation, activation functions", resource:"Coursera: Deep Learning Specialization — Course 1 Week 2", url:"https://www.coursera.org/specializations/deep-learning", tag:"AI" },
+        { id:"3-5-3", time:"Afternoon 2hrs", text:"Week review: revise notes, fix any gaps in Swift or AI", resource:"Hacking with Swift — free reference", url:"https://www.hackingwithswift.com", tag:"Review" },
+        { id:"3-5-4", time:"Evening 15min", text:"TypeRacer.com — record end of week 3 WPM", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+    ]},
+    { week: 4, days: [
+      { date: "Thu 18 Jun 2026", label: "Day 16", tasks: [
+        { id:"4-1-1", time:"Morning 15min", text:"Keybr.com — full keyboard speed drill", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"4-1-2", time:"Mid-morning 2.5hrs", text:"Swift: Lists, ForEach, ScrollView, dynamic data", resource:"100 Days of SwiftUI — Day 31–35", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"4-1-3", time:"Afternoon 2hrs", text:"Deep Learning Specialization: Backpropagation explained", resource:"Coursera: Deep Learning Specialization — Course 1 Week 3", url:"https://www.coursera.org/specializations/deep-learning", tag:"AI" },
+        { id:"4-1-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Fri 19 Jun 2026", label: "Day 17", tasks: [
+        { id:"4-2-1", time:"Morning 15min", text:"Keybr.com — weak key focus", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"4-2-2", time:"Mid-morning 2.5hrs", text:"PyTorch: Build first neural network from scratch", resource:"YouTube: Daniel Bourke — PyTorch for Deep Learning Ch2", url:"https://www.youtube.com/@mrdbourke", tag:"PyTorch" },
+        { id:"4-2-3", time:"Afternoon 2hrs", text:"Swift: @ObservableObject, @EnvironmentObject, data flow", resource:"Apple Developer — Data Essentials in SwiftUI (WWDC)", url:"https://developer.apple.com/videos/play/wwdc2020/10040/", tag:"Swift" },
+        { id:"4-2-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Mon 22 Jun 2026", label: "Day 18", tasks: [
+        { id:"4-3-1", time:"Morning 15min", text:"Keybr.com — speed push, aim above comfort zone", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"4-3-2", time:"Mid-morning 2.5hrs", text:"Swift: Sheets, alerts, confirmations — modal UX patterns", resource:"100 Days of SwiftUI — Day 36–40", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
+        { id:"4-3-3", time:"Afternoon 2hrs", text:"PyTorch: Training loop, loss functions, optimisers", resource:"PyTorch — Training a Classifier Tutorial", url:"https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html", tag:"PyTorch" },
+        { id:"4-3-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Tue 23 Jun 2026", label: "Day 19", tasks: [
+        { id:"4-4-1", time:"Morning 15min", text:"Keybr.com — consistency drill", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"4-4-2", time:"Mid-morning 2.5hrs", text:"Deep Learning Specialization: Improving neural networks — hyperparameters", resource:"Coursera: Deep Learning Specialization — Course 2 Week 1", url:"https://www.coursera.org/specializations/deep-learning", tag:"AI" },
+        { id:"4-4-3", time:"Afternoon 2hrs", text:"Swift: Finish and polish Calculator app — test all functions", resource:"Apple Developer — Xcode Simulator Guide", url:"https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device", tag:"Swift" },
+        { id:"4-4-4", time:"Evening 15min", text:"TypeRacer.com — 3 races", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+      { date: "Wed 24 Jun 2026", label: "Day 20", tasks: [
+        { id:"4-5-1", time:"Morning 15min", text:"Keybr.com — Phase 1 final typing test, record WPM", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
+        { id:"4-5-2", time:"Mid-morning 2.5hrs", text:"Phase 1 review: Go through all Swift notes, fill gaps", resource:"Hacking with Swift — free reference", url:"https://www.hackingwithswift.com", tag:"Review" },
+        { id:"4-5-3", time:"Afternoon 2hrs", text:"Phase 1 review: AI/ML concepts recap, review Jupyter notebooks", resource:"fast.ai — Practical Deep Learning (free)", url:"https://www.fast.ai", tag:"Review" },
+        { id:"4-5-4", time:"Evening 15min", text:"TypeRacer.com — Phase 1 final race, record score", resource:"TypeRacer.com", url:"https://www.typeracer.com", tag:"Typing" },
+      ]},
+    ]},
+  ]
+}];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
+const SUPABASE_USER = 'roadmap';
+
+let sbClient = null;
+let userId = SUPABASE_USER;
+let checked = {};
+let notes = {};
+let activeFilter = 'All';
+let syncMode = 'offline';
+
+const allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
+const totalCount = allTasks.length;
+
+// ══════════════════════════════════════════
+// AUTO CONNECT ON LOAD
+// ══════════════════════════════════════════
+async function autoConnect() {
+  try {
+    const { createClient } = window.supabase;
+    sbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const { data, error } = await sbClient
+      .from('ios_ai_progress')
+      .select('task_id, done, note')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+
+    checked = {};
+    notes = {};
+    (data || []).forEach(row => {
+      if (row.done) checked[row.task_id] = true;
+      if (row.note) notes[row.task_id] = row.note;
+    });
+
+    syncMode = 'live';
+    updateSyncDot('live');
+
+    // Subscribe to realtime changes
+    sbClient.channel('progress-changes')
+      .on('postgres_changes', {
+        event: '*', schema: 'public',
+        table: 'ios_ai_progress',
+        filter: `user_id=eq.${userId}`
+      }, (payload) => {
+        if (payload.new) {
+          checked[payload.new.task_id] = payload.new.done;
+          if (payload.new.note !== undefined) notes[payload.new.task_id] = payload.new.note;
+          renderAll();
+        }
+      })
+      .subscribe();
+
+  } catch(e) {
+    syncMode = 'offline';
+    updateSyncDot('offline');
+    showToast('Supabase offline — using local storage');
+    const saved = localStorage.getItem('checked_local');
+    checked = saved ? JSON.parse(saved) : {};
+    const savedNotes = localStorage.getItem('notes_local');
+    notes = savedNotes ? JSON.parse(savedNotes) : {};
+  }
+
+  document.getElementById('settings-user').textContent = userId;
+  document.getElementById('settings-sync').textContent = syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
+  renderAll();
+}
+
+async function syncTask(taskId, done) {
+  localStorage.setItem('checked_local', JSON.stringify(checked));
+  localStorage.setItem('notes_local', JSON.stringify(notes));
+  if (syncMode !== 'live' || !sbClient) return;
+
+  updateSyncDot('syncing');
+  try {
+    await sbClient.from('ios_ai_progress').upsert(
+      { user_id: userId, task_id: taskId, done, note: notes[taskId] || '', updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,task_id' }
+    );
+    updateSyncDot('live');
+  } catch(e) {
+    updateSyncDot('offline');
+    showToast('Sync failed — saved locally');
+  }
+}
+
+async function syncNote(taskId, note) {
+  notes[taskId] = note;
+  localStorage.setItem('notes_local', JSON.stringify(notes));
+  if (syncMode !== 'live' || !sbClient) return;
+
+  updateSyncDot('syncing');
+  try {
+    await sbClient.from('ios_ai_progress').upsert(
+      { user_id: userId, task_id: taskId, done: !!checked[taskId], note, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id,task_id' }
+    );
+    updateSyncDot('live');
+  } catch(e) {
+    updateSyncDot('offline');
+  }
+}
+
+async function forceSync() {
+  if (syncMode !== 'live' || !sbClient) { showToast('Not connected to Supabase'); return; }
+  updateSyncDot('syncing');
+  try {
+    const rows = Object.entries(checked).map(([task_id, done]) => ({
+      user_id: userId, task_id, done, note: notes[task_id] || '', updated_at: new Date().toISOString()
+    }));
+    if (rows.length > 0) {
+      await sbClient.from('ios_ai_progress').upsert(rows, { onConflict: 'user_id,task_id' });
+    }
+    updateSyncDot('live');
+    showToast('Synced successfully ✓');
+    closeSettings();
+  } catch(e) {
+    updateSyncDot('offline');
+    showToast('Sync failed');
+  }
+}
+
+function updateSyncDot(state) {
+  const dot = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + (state === 'live' ? '' : state);
+  label.textContent = state === 'live' ? 'LIVE' : state === 'syncing' ? 'SYNC...' : 'OFFLINE';
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderAll() {
+  updateStats();
+  renderWeeks();
+}
+
+function updateStats() {
+  const done = allTasks.filter(t => checked[t.id]).length;
+  const pct = Math.round((done / totalCount) * 100);
+
+  document.getElementById('ring-pct').textContent = pct + '%';
+  document.getElementById('ring-total').textContent = done + '/' + totalCount;
+
+  const circ = 213.6;
+  document.getElementById('ring-fg').style.strokeDashoffset = circ - (circ * pct / 100);
+
+  // Today / this week stats (based on today's date)
+  const today = new Date().toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  const todayTasks = allTasks.filter(t => {
+    const day = PHASES.flatMap(p => p.weeks.flatMap(w => w.days)).find(d => d.tasks.includes(t));
+    return day && day.date === today;
+  });
+  const todayDone = todayTasks.filter(t => checked[t.id]).length;
+  const todayTotal = todayTasks.length || 4;
+
+  document.getElementById('stat-today').textContent = todayDone + '/' + todayTotal;
+  document.getElementById('bar-today').style.width = Math.round((todayDone / todayTotal) * 100) + '%';
+
+  // This week
+  const weekTasks = PHASES[0].weeks.flatMap(w => w.days.flatMap(d => d.tasks)).slice(0, 20);
+  const weekDone = weekTasks.filter(t => checked[t.id]).length;
+  document.getElementById('stat-week').textContent = weekDone + '/' + weekTasks.length;
+  document.getElementById('bar-week').style.width = Math.round((weekDone / weekTasks.length) * 100) + '%';
+}
+
+function renderWeeks() {
+  const container = document.getElementById('main-content');
+  container.innerHTML = '';
+
+  PHASES.forEach(phase => {
+    phase.weeks.forEach((week, wi) => {
+      const weekTasks = week.days.flatMap(d => d.tasks);
+      const weekDone = weekTasks.filter(t => checked[t.id]).length;
+      const isOpen = wi === 0; // first week open by default
+
+      const block = document.createElement('div');
+      block.className = 'week-block';
+      block.style.animationDelay = (wi * 0.05) + 's';
+
+      const dateFrom = week.days[0].date.split(' ').slice(1).join(' ');
+      const dateTo = week.days[week.days.length-1].date.split(' ').slice(1).join(' ');
+
+      block.innerHTML = `
+        <button class="week-header ${isOpen ? 'open' : ''}" onclick="toggleWeek(this)">
+          <div class="week-left">
+            <div class="week-dot" style="background:${phase.color};${isOpen ? `box-shadow:0 0 8px ${phase.color}` : ''}"></div>
+            <div>
+              <div class="week-title">Week ${week.week}</div>
+              <div class="week-dates">${dateFrom} – ${dateTo}</div>
+            </div>
+          </div>
+          <div class="week-right">
+            <span class="week-count" style="color:${weekDone === weekTasks.length ? 'var(--accent)' : ''}">${weekDone}/${weekTasks.length}</span>
+            <span class="week-chevron ${isOpen ? 'open' : ''}">▼</span>
+          </div>
+        </button>
+        <div class="days-container ${isOpen ? 'open' : ''}" id="days-${wi}">
+          ${week.days.map((day, di) => renderDay(day, wi, di)).join('')}
+        </div>
+      `;
+
+      container.appendChild(block);
+    });
+  });
+}
+
+function renderDay(day, wi, di) {
+  const dayDone = day.tasks.filter(t => checked[t.id]).length;
+  const allDone = dayDone === day.tasks.length;
+  const filteredTasks = activeFilter === 'All' ? day.tasks : day.tasks.filter(t => t.tag === activeFilter);
+  if (filteredTasks.length === 0) return '';
+
+  return `
+    <div class="day-block">
+      <button class="day-header ${allDone ? 'complete' : ''}" onclick="toggleDay(this, '${wi}-${di}')">
+        <div class="day-left">
+          <div class="day-check ${allDone ? 'done' : ''}">${allDone ? '✓' : ''}</div>
+          <div>
+            <div class="day-label">${day.label}</div>
+            <div class="day-date">${day.date}</div>
+          </div>
+        </div>
+        <div class="day-right">
+          <span class="day-progress" style="color:${allDone ? 'var(--accent)' : ''}">${dayDone}/${day.tasks.length}</span>
+          <span style="color:var(--text3);font-size:10px" id="chev-${wi}-${di}">▼</span>
+        </div>
+      </button>
+      <div class="tasks-wrap" id="tasks-${wi}-${di}">
+        ${filteredTasks.map(task => renderTask(task)).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderTask(task) {
+  const isDone = checked[task.id];
+  const note = (notes[task.id] || '').slice(0, 30);
+  const remaining = 30 - note.length;
+  const countClass = remaining <= 5 ? 'over' : remaining <= 10 ? 'warn' : '';
+  return `
+    <div class="task-item ${isDone ? 'done' : ''}" onclick="toggleTask('${task.id}')">
+      <div class="task-checkbox">${isDone ? '✓' : ''}</div>
+      <div class="task-body">
+        <div class="task-meta">
+          <span class="task-tag tag-${task.tag}">${task.tag}</span>
+          <span class="task-time">${task.time}</span>
+        </div>
+        <div class="task-text">${task.text}</div>
+        <div class="task-resource">
+          <span style="font-size:10px;color:var(--text3)">📚</span>
+          <a href="${task.url}" target="_blank" onclick="event.stopPropagation()">${task.resource} ↗</a>
+        </div>
+        <div class="task-note-wrap" onclick="event.stopPropagation()">
+          <input
+            class="task-note-input"
+            type="text"
+            maxlength="30"
+            placeholder="Add a note..."
+            value="${note.replace(/"/g, '&quot;')}"
+            id="note-${task.id}"
+            oninput="onNoteInput('${task.id}', this)"
+            onblur="onNoteBlur('${task.id}', this.value)"
+          />
+          <span class="task-note-count ${countClass}" id="note-count-${task.id}">${remaining}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════
+function toggleTask(taskId) {
+  checked[taskId] = !checked[taskId];
+  syncTask(taskId, checked[taskId]);
+  renderAll();
+  if (checked[taskId]) showToast('Task complete ✓');
+}
+
+let noteTimers = {};
+function onNoteInput(taskId, input) {
+  const val = input.value.slice(0, 30);
+  input.value = val;
+  const remaining = 30 - val.length;
+  const countEl = document.getElementById('note-count-' + taskId);
+  if (countEl) {
+    countEl.textContent = remaining;
+    countEl.className = 'task-note-count' + (remaining <= 5 ? ' over' : remaining <= 10 ? ' warn' : '');
+  }
+  // Debounce sync — save 1s after user stops typing
+  clearTimeout(noteTimers[taskId]);
+  noteTimers[taskId] = setTimeout(() => syncNote(taskId, val), 1000);
+}
+
+function onNoteBlur(taskId, val) {
+  clearTimeout(noteTimers[taskId]);
+  syncNote(taskId, val.slice(0, 30));
+}
+
+function toggleWeek(btn) {
+  const isOpen = btn.classList.contains('open');
+  btn.classList.toggle('open', !isOpen);
+  btn.nextElementSibling.classList.toggle('open', !isOpen);
+  btn.querySelector('.week-chevron').classList.toggle('open', !isOpen);
+  const dot = btn.querySelector('.week-dot');
+  dot.style.boxShadow = !isOpen ? `0 0 8px ${dot.style.background}` : 'none';
+}
+
+function toggleDay(btn, key) {
+  const wrap = document.getElementById('tasks-' + key);
+  const chev = document.getElementById('chev-' + key);
+  const isVisible = wrap.style.display !== 'none';
+  wrap.style.display = isVisible ? 'none' : 'block';
+  if (chev) chev.style.transform = isVisible ? 'rotate(-90deg)' : '';
+}
+
+function setFilter(filter, el) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderAll();
+}
+
+function openSettings() {
+  document.getElementById('settings-overlay').classList.add('open');
+}
+
+function closeSettings(e) {
+  if (!e || e.target === document.getElementById('settings-overlay')) {
+    document.getElementById('settings-overlay').classList.remove('open');
+  }
+}
+
+function reconnect() {
+  closeSettings();
+  autoConnect();
+  showToast('Reconnecting...');
+}
+
+async function resetProgress() {
+  if (!confirm('Reset all progress and notes? This cannot be undone.')) return;
+  checked = {};
+  notes = {};
+  localStorage.setItem('checked_local', '{}');
+  localStorage.setItem('notes_local', '{}');
+  if (syncMode === 'live' && sbClient) {
+    await sbClient.from('ios_ai_progress').delete().eq('user_id', userId);
+  }
+  renderAll();
+  closeSettings();
+  showToast('Progress reset');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Start the app — called last so all functions are defined
+autoConnect();
+</script>
+</body>
+</html>
