@@ -464,6 +464,56 @@
   .task-note-count.warn { color: var(--orange); }
   .task-note-count.over { color: var(--red); }
 
+  /* ── TABS ── */
+  .tab-btn {
+    padding: 6px 16px; border-radius: 99px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+
+  .tab-btn.active {
+    background: var(--accent-light); border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* ── DRAG REORDER ── */
+  .drag-handle {
+    color: var(--text3); font-size: 16px; cursor: grab;
+    padding: 0 6px; user-select: none; flex-shrink: 0;
+  }
+
+  .drag-handle:active { cursor: grabbing; }
+
+  .dragging { opacity: 0.4; }
+  .drag-over { border-top: 2px solid var(--accent) !important; }
+
+  /* ── TASK REMOVE IN PANEL ── */
+  .task-remove-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+
+  .task-remove-row:last-child { border-bottom: none; }
+
+  .task-remove-row.removed .task-remove-label {
+    text-decoration: line-through; color: var(--text3);
+  }
+
+  .task-remove-label { font-size: 13px; color: var(--text); line-height: 1.4; flex: 1; }
+  .task-remove-tag { font-size: 10px; font-weight: 500; margin-bottom: 3px; }
+
+  .task-toggle-btn {
+    flex-shrink: 0; padding: 4px 10px; border-radius: 6px;
+    border: 1px solid var(--border2); background: var(--surface2);
+    font-family: var(--font); font-size: 11px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+
+  .task-toggle-btn.remove { color: var(--red); border-color: #fca5a5; }
+  .task-toggle-btn.restore { color: var(--green); border-color: #86efac; }
+
   /* ── CURRICULUM EDITOR ── */
   .form-label {
     display: block; font-size: 12px; font-weight: 600;
@@ -688,10 +738,29 @@
 <div class="panel-overlay" id="manage-subjects-overlay" onclick="closeManageSubjects(event)">
   <div class="panel" style="max-height:85vh;overflow-y:auto">
     <div class="panel-handle"></div>
-    <div class="panel-title">Subjects</div>
-    <div id="subjects-list"></div>
-    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-      <button class="panel-btn" onclick="closeManageSubjects();openAddSubject()" style="width:100%;text-align:center">+ Add new subject</button>
+    <div class="panel-title">Subjects & tasks</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="tab-btn active" id="tab-subjects-btn" onclick="switchTab('subjects')">Subjects</button>
+      <button class="tab-btn" id="tab-tasks-btn" onclick="switchTab('tasks')">Base tasks</button>
+    </div>
+
+    <!-- SUBJECTS TAB -->
+    <div id="tab-subjects">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Drag ☰ to reorder subjects in the schedule.</p>
+      <div id="subjects-list"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <button class="panel-btn" onclick="closeManageSubjects();openAddSubject()" style="width:100%;text-align:center">+ Add new subject</button>
+      </div>
+    </div>
+
+    <!-- BASE TASKS TAB -->
+    <div id="tab-tasks" style="display:none">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Remove individual tasks from the base schedule. Removed tasks are hidden but your progress is preserved.</p>
+      <div id="base-tasks-list"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <button class="panel-btn danger" onclick="restoreAllTasks()" style="width:100%;text-align:center">Restore all removed tasks</button>
+      </div>
     </div>
   </div>
 </div>
@@ -900,8 +969,11 @@ allTasks.forEach(t => taskById[t.id] = t);
 // task of the same category into the current slot.
 // ══════════════════════════════════════════
 function buildDynamicSchedule() {
+  // Tasks filtered by removal
+  const visibleTasks = allTasks.filter(t => !removedTasks.has(t.id));
+
   const queueByTag = {};
-  allTasks.forEach(t => {
+  visibleTasks.forEach(t => {
     if (!queueByTag[t.tag]) queueByTag[t.tag] = [];
     queueByTag[t.tag].push(t);
   });
@@ -919,16 +991,18 @@ function buildDynamicSchedule() {
   ));
 
   return allDays.map(day => {
-    const dynamicTasks = day.tasks.map(orig => {
-      const tag = orig.tag;
-      if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
-      const pending = pendingByTag[tag] || [];
-      if (pendingIdx[tag] < pending.length) {
-        const next = pending[pendingIdx[tag]++];
-        return { ...next, _status: 'pending', _movedUp: next.id !== orig.id };
-      }
-      return null;
-    }).filter(Boolean);
+    const dynamicTasks = day.tasks
+      .filter(orig => !removedTasks.has(orig.id))
+      .map(orig => {
+        const tag = orig.tag;
+        if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
+        const pending = pendingByTag[tag] || [];
+        if (pendingIdx[tag] < pending.length) {
+          const next = pending[pendingIdx[tag]++];
+          return { ...next, _status: 'pending', _movedUp: next.id !== orig.id };
+        }
+        return null;
+      }).filter(Boolean);
     return { ...day, dynamicTasks };
   });
 }
@@ -982,6 +1056,7 @@ async function autoConnect() {
   document.getElementById('settings-sync').textContent =
     syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
   await loadSubjects();
+  await loadRemovedTasks();
   rebuildFilterChips();
   renderAll();
 }
@@ -1169,6 +1244,13 @@ function renderTask(task) {
   const movedBadge = task._movedUp
     ? `<span style="font-size:10px;background:#fef9c3;color:#854d0e;padding:1px 7px;border-radius:99px;font-weight:500;margin-left:4px">moved up ↑</span>`
     : '';
+  const isBaseTask = !!taskById[task.id];
+  const removeBtn = isBaseTask
+    ? `<button onclick="event.stopPropagation();quickRemoveTask('${task.id}')"
+        style="background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:1px"
+        title="Remove this task from schedule">×</button>`
+    : '';
+
   return `
     <div class="task-item ${isDone?'done':''}" onclick="toggleTask('${task.id}')">
       <div class="task-checkbox">${isDone?'✓':''}</div>
@@ -1193,6 +1275,7 @@ function renderTask(task) {
           <span class="task-note-count ${countCls}" id="note-count-${task.id}">${remaining}</span>
         </div>
       </div>
+      ${removeBtn}
     </div>`;
 }
 
@@ -1204,6 +1287,13 @@ function toggleTask(taskId) {
   syncTask(taskId, checked[taskId]);
   renderAll();
   if (checked[taskId]) showToast('Task complete — schedule updated ✓');
+}
+
+async function quickRemoveTask(taskId) {
+  removedTasks.add(taskId);
+  await saveRemovedTasks();
+  renderAll();
+  showToast('Task removed — tap Subjects → Base tasks to restore');
 }
 
 let noteTimers = {};
@@ -1493,7 +1583,11 @@ function showStatus(msg, type) {
 }
 
 // ── MANAGE SUBJECTS UI ──
+let activeTab = 'subjects';
+let dragSrcIdx = null;
+
 function openManageSubjects() {
+  switchTab('subjects');
   renderSubjectsList();
   document.getElementById('manage-subjects-overlay').classList.add('open');
 }
@@ -1503,24 +1597,82 @@ function closeManageSubjects(e) {
     document.getElementById('manage-subjects-overlay').classList.remove('open');
 }
 
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tab-subjects').style.display = tab === 'subjects' ? 'block' : 'none';
+  document.getElementById('tab-tasks').style.display    = tab === 'tasks'    ? 'block' : 'none';
+  document.getElementById('tab-subjects-btn').classList.toggle('active', tab === 'subjects');
+  document.getElementById('tab-tasks-btn').classList.toggle('active', tab === 'tasks');
+  if (tab === 'tasks') renderBaseTasksList();
+}
+
+// ── SUBJECT LIST WITH DRAG REORDER ──
 function renderSubjectsList() {
   const el = document.getElementById('subjects-list');
   if (subjects.length === 0) {
     el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:16px 0">No custom subjects yet. Add your first one!</p>';
     return;
   }
-  el.innerHTML = subjects.map(s => `
-    <div class="subject-chip">
-      <div style="display:flex;align-items:center;gap:10px">
+  el.innerHTML = subjects.map((s, i) => `
+    <div class="subject-chip" id="subj-row-${i}"
+      draggable="true"
+      ondragstart="onSubjDragStart(event,${i})"
+      ondragover="onSubjDragOver(event,${i})"
+      ondrop="onSubjDrop(event,${i})"
+      ondragend="onSubjDragEnd()">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <span class="drag-handle" title="Drag to reorder">☰</span>
         <div class="subject-chip-dot" style="background:${s.color}"></div>
         <div>
           <div style="font-size:14px;font-weight:500;color:var(--text)">${s.name}</div>
-          <div style="font-size:11px;color:var(--text3)">${s.hoursPerWeek} hrs/week · starts week ${s.startWeek} · ${s.tasks.length} tasks</div>
+          <div style="font-size:11px;color:var(--text3)">${s.hoursPerWeek} hrs/week · week ${s.startWeek} · ${s.tasks.length} tasks</div>
         </div>
       </div>
       <button class="subject-remove" onclick="removeSubject('${s.id}')" title="Remove subject">×</button>
     </div>
   `).join('');
+}
+
+function onSubjDragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onSubjDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.subject-chip').forEach(el => el.classList.remove('drag-over'));
+  if (idx !== dragSrcIdx) document.getElementById('subj-row-' + idx).classList.add('drag-over');
+}
+
+async function onSubjDrop(e, idx) {
+  e.preventDefault();
+  if (dragSrcIdx === null || dragSrcIdx === idx) return;
+  const moved = subjects.splice(dragSrcIdx, 1)[0];
+  subjects.splice(idx, 0, moved);
+  localStorage.setItem('subjects_local', JSON.stringify(subjects));
+  if (syncMode === 'live' && sbClient) {
+    // Update order by re-saving all subjects with fresh timestamps
+    for (let i = 0; i < subjects.length; i++) {
+      await sbClient.from('ios_ai_subjects').upsert({
+        ...subjects[i],
+        tasks_json: JSON.stringify(subjects[i].tasks),
+        user_id: userId,
+        sort_order: i
+      }, { onConflict: 'id' }).catch(() => {});
+    }
+  }
+  renderSubjectsList();
+  renderAll();
+  showToast('Subject order updated ✓');
+}
+
+function onSubjDragEnd() {
+  dragSrcIdx = null;
+  document.querySelectorAll('.subject-chip').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
 }
 
 async function removeSubject(subjectId) {
@@ -1530,6 +1682,86 @@ async function removeSubject(subjectId) {
   renderSubjectsList();
   renderAll();
   showToast('Subject removed — progress preserved ✓');
+}
+
+// ── BASE TASK REMOVAL ──
+// removedTasks is a Set of task IDs hidden from the base schedule
+let removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
+
+async function saveRemovedTasks() {
+  const arr = [...removedTasks];
+  localStorage.setItem('removed_tasks', JSON.stringify(arr));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    await sbClient.from('ios_ai_subjects').upsert({
+      id: `removed-tasks-${userId}`,
+      user_id: userId,
+      name: '__removed_tasks__',
+      tasks_json: JSON.stringify(arr),
+      created_at: new Date().toISOString()
+    }, { onConflict: 'id' });
+  } catch(e) {}
+}
+
+async function loadRemovedTasks() {
+  removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    const { data } = await sbClient.from('ios_ai_subjects')
+      .select('tasks_json')
+      .eq('id', `removed-tasks-${userId}`)
+      .single();
+    if (data?.tasks_json) {
+      removedTasks = new Set(JSON.parse(data.tasks_json));
+      localStorage.setItem('removed_tasks', JSON.stringify([...removedTasks]));
+    }
+  } catch(e) {}
+}
+
+function renderBaseTasksList() {
+  const el = document.getElementById('base-tasks-list');
+  const grouped = {};
+  allTasks.forEach(t => {
+    if (!grouped[t.tag]) grouped[t.tag] = [];
+    grouped[t.tag].push(t);
+  });
+
+  el.innerHTML = Object.entries(grouped).map(([tag, tasks]) => `
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${tag}</div>
+      ${tasks.map(t => {
+        const isRemoved = removedTasks.has(t.id);
+        return `
+          <div class="task-remove-row ${isRemoved ? 'removed' : ''}">
+            <div style="flex:1">
+              <div class="task-remove-label">${t.text}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">${t.time}</div>
+            </div>
+            <button class="task-toggle-btn ${isRemoved ? 'restore' : 'remove'}"
+              onclick="toggleTaskRemoval('${t.id}')">
+              ${isRemoved ? 'Restore' : 'Remove'}
+            </button>
+          </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+async function toggleTaskRemoval(taskId) {
+  if (removedTasks.has(taskId)) removedTasks.delete(taskId);
+  else removedTasks.add(taskId);
+  await saveRemovedTasks();
+  renderBaseTasksList();
+  renderAll();
+}
+
+async function restoreAllTasks() {
+  if (!confirm('Restore all removed tasks to the schedule?')) return;
+  removedTasks.clear();
+  await saveRemovedTasks();
+  renderBaseTasksList();
+  renderAll();
+  showToast('All tasks restored ✓');
 }
 
 // ── FILTER CHIPS ──
