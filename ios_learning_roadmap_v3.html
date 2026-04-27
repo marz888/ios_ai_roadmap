@@ -1180,12 +1180,15 @@ function renderWeeks() {
 
   PHASES.forEach((phase, pi) => {
     phase.weeks.forEach((week, wi) => {
-      const scheduledDays = schedule.filter(d => d.week === week);
-      const weekTasks     = scheduledDays.flatMap(d => d.dynamicTasks);
-      const weekDone      = weekTasks.filter(t => checked[t.id]).length;
-      const isOpen        = wi === 0;
-      const dateFrom = week.days[0].date.split(' ').slice(1).join(' ');
-      const dateTo   = week.days[week.days.length-1].date.split(' ').slice(1).join(' ');
+      // Match schedule days by week number and phase index, not object reference
+      const scheduledDays = schedule.filter(d =>
+        d.week.week === week.week && d.phase.id === phase.id
+      );
+      const weekTasks = scheduledDays.flatMap(d => d.dynamicTasks);
+      const weekDone  = weekTasks.filter(t => checked[t.id]).length;
+      const isOpen    = wi === 0;
+      const dateFrom  = week.days[0].date.split(' ').slice(1).join(' ');
+      const dateTo    = week.days[week.days.length-1].date.split(' ').slice(1).join(' ');
 
       const block = document.createElement('div');
       block.className = 'week-block';
