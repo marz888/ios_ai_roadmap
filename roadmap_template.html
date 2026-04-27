@@ -1,0 +1,2354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f7f7f5">
+<title>Learning Roadmap Template (1.00)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --surface: #ffffff;
+    --surface2: #f9f9f8;
+    --border: #e8e8e6;
+    --border2: #d4d4d0;
+    --text: #1a1a1a;
+    --text2: #6b6b6b;
+    --text3: #9b9b9b;
+    --accent: #6366f1;
+    --accent-light: #ede9fe;
+    --accent-text: #4338ca;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --red: #dc2626;
+    --red-light: #fee2e2;
+    --orange: #ea580c;
+    --orange-light: #ffedd5;
+    --font: 'Inter', -apple-system, sans-serif;
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh; min-height: 100dvh;
+    overflow-x: hidden;
+    padding-top: var(--safe-top);
+    padding-bottom: calc(var(--safe-bottom) + 80px);
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+  }
+
+  .header-inner {
+    max-width: 720px; margin: 0 auto;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+  }
+
+  .logo {
+    font-size: 16px; font-weight: 700;
+    color: var(--accent); letter-spacing: -0.3px;
+    white-space: nowrap;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .sync-indicator {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--text3);
+  }
+
+  .sync-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  .sync-dot.offline { background: var(--red); animation: none; }
+  .sync-dot.syncing { background: #f59e0b; }
+
+  .settings-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 11px;
+    color: var(--text2); font-size: 14px; cursor: pointer;
+    font-family: var(--font); transition: all 0.15s;
+  }
+
+  .settings-btn:hover { background: var(--border); }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 720px; margin: 0 auto;
+    padding: 28px 20px 0;
+  }
+
+  .hero-title {
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: 700; line-height: 1.2;
+    color: var(--text); margin-bottom: 4px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: 13px; color: var(--text3);
+    margin-bottom: 20px;
+  }
+
+  /* Progress card */
+  .progress-section {
+    display: flex; gap: 20px; align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .progress-ring-wrap { flex-shrink: 0; position: relative; }
+  .progress-ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 6; }
+  .ring-fg {
+    fill: none; stroke-width: 6;
+    stroke: var(--accent);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+
+  .ring-pct { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .ring-total { font-size: 10px; color: var(--text3); }
+
+  .progress-stats { flex: 1; }
+
+  .stat-row {
+    display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 6px;
+  }
+
+  .stat-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-val { font-size: 12px; font-weight: 600; color: var(--text); }
+
+  .stat-bar-wrap {
+    background: var(--border);
+    border-radius: 99px; height: 5px;
+    overflow: hidden; margin-top: 4px; margin-bottom: 14px;
+  }
+
+  .stat-bar { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.6s ease; }
+
+  /* ── FILTERS ── */
+  .filters {
+    max-width: 720px; margin: 0 auto;
+    padding: 0 20px 16px;
+  }
+
+  .filter-scroll {
+    display: flex; gap: 6px;
+    overflow-x: auto; padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .filter-scroll::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    flex-shrink: 0;
+    padding: 6px 14px; border-radius: 99px;
+    font-family: var(--font); font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .filter-chip.active {
+    border-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent-text);
+  }
+
+  /* ── CONTENT ── */
+  .content { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── WEEK BLOCK ── */
+  .week-block { margin-bottom: 12px; }
+
+  .week-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 14px 16px;
+    cursor: pointer; width: 100%;
+    font-family: var(--font); color: var(--text);
+    transition: all 0.15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .week-header.open {
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    border-color: var(--border2);
+  }
+
+  .week-header:hover { background: var(--surface2); }
+
+  .week-left { display: flex; align-items: center; gap: 12px; }
+
+  .week-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0;
+  }
+
+  .week-title { font-size: 15px; font-weight: 600; }
+  .week-dates { font-size: 12px; color: var(--text3); }
+  .week-right { display: flex; align-items: center; gap: 10px; }
+  .week-count { font-size: 12px; color: var(--text3); font-weight: 500; }
+
+  .week-chevron {
+    font-size: 11px; color: var(--text3);
+    transition: transform 0.2s; display: inline-block;
+  }
+
+  .week-chevron.open { transform: rotate(180deg); }
+
+  /* ── DAYS CONTAINER ── */
+  .days-container {
+    border: 1px solid var(--border2); border-top: none;
+    border-bottom-left-radius: var(--radius-lg);
+    border-bottom-right-radius: var(--radius-lg);
+    overflow: hidden; display: none;
+    background: var(--surface);
+  }
+
+  .days-container.open { display: block; }
+
+  /* ── DAY BLOCK ── */
+  .day-block { border-bottom: 1px solid var(--border); }
+  .day-block:last-child { border-bottom: none; }
+
+  .day-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px; cursor: pointer;
+    background: var(--surface2);
+    font-family: var(--font); color: var(--text);
+    width: 100%; transition: background 0.15s;
+  }
+
+  .day-header:hover { background: #f1f1ef; }
+  .day-header.complete { background: #f0fdf4; }
+
+  .day-left { display: flex; align-items: center; gap: 10px; }
+
+  .day-check {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 10px; transition: all 0.2s;
+  }
+
+  .day-check.done { border-color: var(--green); background: var(--green); color: #fff; }
+
+  .day-label { font-size: 14px; font-weight: 600; }
+  .day-date { font-size: 12px; color: var(--text3); }
+  .day-right { display: flex; align-items: center; gap: 8px; }
+  .day-progress { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+  /* ── TASKS ── */
+  .tasks-wrap { padding: 10px 12px 12px; background: var(--bg); }
+
+  .task-item {
+    display: flex; gap: 12px;
+    padding: 14px; margin-bottom: 8px;
+    border-radius: var(--radius); cursor: pointer;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: all 0.15s;
+    align-items: flex-start;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .task-item:last-child { margin-bottom: 0; }
+  .task-item:hover { border-color: var(--border2); box-shadow: 0 2px 6px rgba(0,0,0,0.07); }
+  .task-item:active { transform: scale(0.99); }
+  .task-item.done { background: var(--surface2); border-color: var(--border); opacity: 0.6; box-shadow: none; }
+
+  .task-checkbox {
+    width: 20px; height: 20px; border-radius: 6px;
+    border: 2px solid var(--border2);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px; transition: all 0.15s;
+    font-size: 11px; font-weight: 700; color: #fff;
+  }
+
+  .task-item.done .task-checkbox { background: var(--accent); border-color: var(--accent); }
+
+  .task-body { flex: 1; min-width: 0; }
+
+  .task-meta {
+    display: flex; gap: 6px; align-items: center;
+    flex-wrap: wrap; margin-bottom: 6px;
+  }
+
+  .task-tag {
+    font-size: 11px; padding: 2px 8px;
+    border-radius: 99px; font-weight: 500; flex-shrink: 0;
+  }
+
+  .tag-Typing  { background: #dbeafe; color: #1d4ed8; }
+  .tag-Python  { background: #dcfce7; color: #15803d; }
+  .tag-AI      { background: #ede9fe; color: #6d28d9; }
+  .tag-Swift   { background: #fee2e2; color: #b91c1c; }
+  .tag-PyTorch { background: #fef3c7; color: #b45309; }
+  .tag-Review  { background: #f1f5f9; color: #475569; }
+
+  .task-time { font-size: 11px; color: var(--text3); }
+
+  .task-text {
+    font-size: 14px; line-height: 1.5;
+    color: var(--text); margin-bottom: 8px;
+  }
+
+  .task-item.done .task-text { text-decoration: line-through; color: var(--text3); }
+
+  .task-resource { display: flex; align-items: center; gap: 5px; }
+
+  .task-resource a {
+    font-size: 12px; color: var(--accent);
+    text-decoration: none; font-weight: 500;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+
+  .task-resource a:hover { border-bottom-color: var(--accent); }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 10px 20px calc(10px + var(--safe-bottom));
+    display: flex; justify-content: center; gap: 8px;
+  }
+
+  .nav-btn {
+    flex: 1; max-width: 160px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 8px;
+    color: var(--text2); font-family: var(--font);
+    font-size: 11px; font-weight: 500;
+    cursor: pointer; text-align: center; transition: all 0.15s;
+  }
+
+  .nav-btn .nav-icon { font-size: 16px; display: block; margin-bottom: 3px; }
+  .nav-btn.active { background: var(--accent-light); border-color: var(--accent); color: var(--accent-text); }
+  .nav-btn:active { transform: scale(0.97); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: calc(80px + var(--safe-bottom) + 10px);
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--text); border-radius: var(--radius);
+    padding: 10px 18px; font-size: 13px; font-weight: 500;
+    color: #fff; opacity: 0; transition: all 0.25s;
+    pointer-events: none; z-index: 300; white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
+  .week-block { animation: fadeIn 0.25s ease both; }
+
+  /* ── SETTINGS PANEL ── */
+  .panel-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.3); z-index: 400; display: none;
+  }
+
+  .panel-overlay.open { display: block; }
+
+  .panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 24px calc(20px + var(--safe-bottom));
+    z-index: 401; transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .panel-overlay.open .panel { transform: translateY(0); }
+
+  .panel-handle {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--border2); margin: 0 auto 20px;
+  }
+
+  .panel-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; color: var(--text); }
+
+  .panel-row {
+    display: flex; justify-content: space-between;
+    align-items: center; padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .panel-row:last-child { border-bottom: none; }
+  .panel-row-label { font-size: 14px; font-weight: 500; color: var(--text); }
+  .panel-row-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .panel-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    color: var(--text2); font-family: var(--font);
+    font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+
+  .panel-btn:hover { background: var(--border); }
+  .panel-btn.danger { color: var(--red); border-color: #fca5a5; }
+
+  /* ── NOTES ── */
+  .task-note-wrap { margin-top: 8px; position: relative; }
+
+  .task-note-input {
+    width: 100%; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 7px;
+    padding: 7px 38px 7px 10px; color: var(--text2);
+    font-family: var(--font); font-size: 12px;
+    outline: none; transition: border-color 0.15s;
+    resize: none; height: 34px; line-height: 1.4;
+  }
+
+  .task-note-input::placeholder { color: var(--text3); }
+  .task-note-input:focus { border-color: var(--accent); color: var(--text); }
+
+  .task-note-count {
+    position: absolute; right: 8px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px; color: var(--text3); pointer-events: none;
+  }
+
+  .task-note-count.warn { color: var(--orange); }
+  .task-note-count.over { color: var(--red); }
+
+  .mode-btn {
+    flex: 1; padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--border2); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+    text-align: center;
+  }
+
+  .mode-btn.active {
+    background: var(--accent-light); border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* ── TABS ── */
+  .tab-btn {
+    padding: 6px 16px; border-radius: 99px;
+    border: 1px solid var(--border); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+
+  .tab-btn.active {
+    background: var(--accent-light); border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  /* ── DRAG REORDER ── */
+  .drag-handle {
+    color: var(--text3); font-size: 16px; cursor: grab;
+    padding: 0 6px; user-select: none; flex-shrink: 0;
+  }
+
+  .drag-handle:active { cursor: grabbing; }
+
+  .dragging { opacity: 0.4; }
+  .drag-over { border-top: 2px solid var(--accent) !important; }
+
+  /* ── TASK REMOVE IN PANEL ── */
+  .task-remove-row {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+
+  .task-remove-row:last-child { border-bottom: none; }
+
+  .task-remove-row.removed .task-remove-label {
+    text-decoration: line-through; color: var(--text3);
+  }
+
+  .task-remove-label { font-size: 13px; color: var(--text); line-height: 1.4; flex: 1; }
+  .task-remove-tag { font-size: 10px; font-weight: 500; margin-bottom: 3px; }
+
+  .task-toggle-btn {
+    flex-shrink: 0; padding: 4px 10px; border-radius: 6px;
+    border: 1px solid var(--border2); background: var(--surface2);
+    font-family: var(--font); font-size: 11px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+
+  .task-toggle-btn.remove { color: var(--red); border-color: #fca5a5; }
+  .task-toggle-btn.restore { color: var(--green); border-color: #86efac; }
+
+  /* ── CHANGELOG ── */
+  .changelog-entry { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .changelog-entry:last-child { border-bottom: none; margin-bottom: 0; }
+  .changelog-version {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .changelog-version-num {
+    font-size: 15px; font-weight: 700; color: var(--text);
+  }
+  .changelog-version-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 99px; background: var(--accent-light);
+    color: var(--accent-text);
+  }
+  .changelog-date { font-size: 11px; color: var(--text3); margin-left: auto; }
+  .changelog-item {
+    display: flex; gap: 8px; align-items: flex-start;
+    margin-bottom: 6px; font-size: 13px; color: var(--text2); line-height: 1.5;
+  }
+  .changelog-bullet {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0; margin-top: 7px;
+  }
+
+  /* ── HELP PANEL ── */
+  .help-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .help-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .help-section h3 {
+    font-size: 15px; font-weight: 600;
+    color: var(--text); margin-bottom: 10px;
+  }
+
+  .help-section p {
+    font-size: 13px; color: var(--text2);
+    line-height: 1.6; margin-bottom: 8px;
+  }
+
+  .help-step {
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .help-step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent-text);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  .help-step-text {
+    font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1;
+  }
+
+  .help-step-text strong { color: var(--text); font-weight: 600; }
+
+  .help-code {
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 10px 14px;
+    font-family: monospace; font-size: 12px;
+    color: var(--accent-text); margin: 8px 0;
+    word-break: break-all; line-height: 1.5;
+  }
+
+  .help-tip {
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; color: #92400e;
+    margin-top: 10px; line-height: 1.5;
+  }
+
+  .help-safe {
+    background: #f0fdf4; border: 1px solid #86efac;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; color: #166534;
+    margin-top: 10px; line-height: 1.5;
+  }
+
+  .help-link {
+    color: var(--accent); text-decoration: none; font-weight: 500;
+  }
+
+  .help-update-btn {
+    width: 100%; margin-top: 12px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 11px; font-family: var(--font);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+
+  .help-update-btn:active { opacity: 0.85; }
+
+  /* ── CURRICULUM EDITOR ── */
+  .form-label {
+    display: block; font-size: 12px; font-weight: 600;
+    color: var(--text2); margin-bottom: 6px; text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .form-input {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--border2); border-radius: 8px;
+    background: var(--bg); color: var(--text);
+    font-family: var(--font); font-size: 14px;
+    outline: none; transition: border-color 0.15s;
+    resize: vertical;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+
+  .hours-btn {
+    padding: 7px 16px; border-radius: 99px;
+    border: 1px solid var(--border2); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+  }
+
+  .hours-btn.active {
+    background: var(--accent-light); border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
+  .color-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 3px solid transparent; cursor: pointer;
+    font-size: 14px; color: #fff; font-weight: 700;
+    transition: all 0.15s; display: flex;
+    align-items: center; justify-content: center;
+  }
+
+  .color-btn.selected { border-color: var(--text); }
+
+  .subject-chip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+  }
+
+  .subject-chip:last-child { border-bottom: none; }
+
+  .subject-chip-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  .subject-remove {
+    background: none; border: none; color: var(--text3);
+    font-size: 18px; cursor: pointer; padding: 0 4px;
+    transition: color 0.15s;
+  }
+
+  .subject-remove:hover { color: var(--red); }
+
+  .generating-spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .week-dates { display: none; }
+    .hero-title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+
+<!-- SETUP BANNER — remove once configured -->
+<div id="setup-banner" style="background:#fef9c3;border-bottom:1px solid #fde68a;padding:12px 20px;font-size:13px;color:#92400e;text-align:center;display:flex;align-items:center;justify-content:center;gap:12px">
+  <span>⚙ This is a blank template. <strong>Ask Claude to fill in your schedule</strong>, then update the Supabase credentials and SUPABASE_USER in the JS.</span>
+  <button onclick="document.getElementById('setup-banner').style.display='none'" style="background:none;border:1px solid #d97706;border-radius:6px;padding:3px 10px;color:#92400e;cursor:pointer;font-size:12px">Dismiss</button>
+</div>
+<header>
+  <div class="header-inner">
+    <div class="logo">iOS & AI Roadmap</div>
+    <div class="header-right">
+      <div class="sync-indicator">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">LIVE</span>
+      </div>
+      <button class="settings-btn" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-title"><span>My</span> Learning Roadmap</div>
+  <div class="hero-sub">Your schedule · 5 days/week</div>
+
+  <div class="progress-section">
+    <div class="progress-ring-wrap">
+      <svg width="80" height="80" viewBox="0 0 80 80">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#6366f1"/>
+            <stop offset="100%" stop-color="#818cf8"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-bg" cx="40" cy="40" r="34"/>
+        <circle class="ring-fg" id="ring-fg" cx="40" cy="40" r="34"
+          stroke-dasharray="213.6"
+          stroke-dashoffset="213.6"/>
+      </svg>
+      <div class="ring-label">
+        <span class="ring-pct" id="ring-pct">0%</span>
+        <span class="ring-total" id="ring-total">0/80</span>
+      </div>
+    </div>
+
+    <div class="progress-stats" style="flex:1">
+      <div class="stat-row">
+        <span class="stat-label">TODAY</span>
+        <span class="stat-val" id="stat-today" style="color:var(--accent)">0/4</span>
+      </div>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar" id="bar-today" style="width:0%;background:var(--accent)"></div>
+      </div>
+      <div style="margin-top:10px"></div>
+      <div class="stat-row">
+        <span class="stat-label">THIS WEEK</span>
+        <span class="stat-val" id="stat-week" style="color:var(--accent)">0/20</span>
+      </div>
+      <div class="stat-bar-wrap">
+        <div class="stat-bar" id="bar-week" style="width:0%;background:var(--accent)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <div class="filter-scroll">
+    <button class="filter-chip active" onclick="setFilter('All',this)">All</button>
+    <button class="filter-chip" onclick="setFilter('Topic',this)">📚 Topic</button>
+    <button class="filter-chip" onclick="setFilter('Review',this)">📝 Review</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="main-content"></div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-checklist">
+    <span class="nav-icon">☑</span>CHECKLIST
+  </button>
+  <button class="nav-btn" id="nav-add" onclick="openAddSubject()">
+    <span class="nav-icon">＋</span>ADD SUBJECT
+  </button>
+  <button class="nav-btn" id="nav-subjects" onclick="openManageSubjects()">
+    <span class="nav-icon">📋</span>SUBJECTS
+  </button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ADD SUBJECT PANEL -->
+<div class="panel-overlay" id="add-subject-overlay" onclick="closeAddSubject(event)">
+  <div class="panel" style="max-height:90vh;overflow-y:auto">
+    <div class="panel-handle"></div>
+    <div class="panel-title">Add a new subject</div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- MODE TOGGLE -->
+      <div>
+        <label class="form-label">How to create the schedule</label>
+        <div style="display:flex;gap:8px">
+          <button class="mode-btn active" id="mode-claude" onclick="selectMode('claude')">✨ Claude generates it</button>
+          <button class="mode-btn" id="mode-manual" onclick="selectMode('manual')">✍ I'll enter it myself</button>
+        </div>
+      </div>
+
+      <!-- SUBJECT NAME -->
+      <div>
+        <label class="form-label">Subject name</label>
+        <input class="form-input" id="as-name" type="text" placeholder="e.g. JavaScript, React, SQL...">
+      </div>
+
+      <!-- HOURS PER WEEK -->
+      <div>
+        <label class="form-label">Hours per week</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="as-hours-btns">
+          <button class="hours-btn active" data-hours="2" onclick="selectHours(this)">2 hrs</button>
+          <button class="hours-btn" data-hours="4" onclick="selectHours(this)">4 hrs</button>
+          <button class="hours-btn" data-hours="6" onclick="selectHours(this)">6 hrs</button>
+          <button class="hours-btn" data-hours="8" onclick="selectHours(this)">8 hrs</button>
+        </div>
+      </div>
+
+      <!-- START WEEK -->
+      <div>
+        <label class="form-label">Start from week</label>
+        <input class="form-input" id="as-week" type="number" min="1" max="24" value="1" placeholder="1">
+      </div>
+
+      <!-- ACCENT COLOUR -->
+      <div>
+        <label class="form-label">Accent colour</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="as-color-btns">
+          <button class="color-btn" data-color="#6366f1" style="background:#6366f1" onclick="selectColor(this)">✓</button>
+          <button class="color-btn" data-color="#f59e0b" style="background:#f59e0b" onclick="selectColor(this)"></button>
+          <button class="color-btn" data-color="#10b981" style="background:#10b981" onclick="selectColor(this)"></button>
+          <button class="color-btn" data-color="#ef4444" style="background:#ef4444" onclick="selectColor(this)"></button>
+          <button class="color-btn" data-color="#3b82f6" style="background:#3b82f6" onclick="selectColor(this)"></button>
+          <button class="color-btn" data-color="#8b5cf6" style="background:#8b5cf6" onclick="selectColor(this)"></button>
+          <button class="color-btn" data-color="#ec4899" style="background:#ec4899" onclick="selectColor(this)"></button>
+          <button class="color-btn" data-color="#14b8a6" style="background:#14b8a6" onclick="selectColor(this)"></button>
+        </div>
+      </div>
+
+      <!-- CLAUDE MODE FIELDS -->
+      <div id="as-claude-fields">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label class="form-label">Anthropic API key</label>
+            <button onclick="openHelp('apikey')" style="background:none;border:none;color:var(--accent);font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;padding:0">How to get & rotate ↗</button>
+          </div>
+          <input class="form-input" id="as-apikey" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off">
+          <div style="font-size:11px;color:var(--text3);margin-top:5px">Get yours free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>. Stored locally only.</div>
+        </div>
+        <div style="margin-top:14px">
+          <label class="form-label">Context for Claude (optional)</label>
+          <textarea class="form-input" id="as-context" rows="3" placeholder="e.g. I want to build web apps, I already know Python basics, focus on modern ES6+ syntax..."></textarea>
+        </div>
+      </div>
+
+      <!-- MANUAL MODE FIELDS -->
+      <div id="as-manual-fields" style="display:none">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:4px">
+          <p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Enter one main tutorial resource. Claude will use this as the primary resource for all generated tasks, but you keep full control.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <label class="form-label">Tutorial / resource name</label>
+              <input class="form-input" id="as-resource-name" type="text" placeholder="e.g. The Odin Project — JavaScript Path">
+            </div>
+            <div>
+              <label class="form-label">Tutorial URL</label>
+              <input class="form-input" id="as-resource-url" type="url" placeholder="https://...">
+            </div>
+            <div>
+              <label class="form-label">Description (used to generate tasks)</label>
+              <textarea class="form-input" id="as-resource-desc" rows="3" placeholder="e.g. A free full-stack curriculum covering JavaScript fundamentals through DOM manipulation and async programming..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label class="form-label">Anthropic API key (still needed to generate task descriptions)</label>
+            <button onclick="openHelp('apikey')" style="background:none;border:none;color:var(--accent);font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;padding:0">↗</button>
+          </div>
+          <input class="form-input" id="as-apikey-manual" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Uses far fewer tokens — Claude only writes task descriptions, not search for resources.</div>
+        </div>
+      </div>
+
+      <div id="as-status" style="display:none;padding:12px;border-radius:8px;font-size:13px"></div>
+
+      <button class="panel-btn" id="as-generate-btn" onclick="generateSubject()" style="background:var(--accent);color:#fff;border-color:var(--accent);padding:12px;font-size:14px;font-weight:600">
+        Generate schedule with Claude ✨
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE SUBJECTS PANEL -->
+<div class="panel-overlay" id="manage-subjects-overlay" onclick="closeManageSubjects(event)">
+  <div class="panel" style="max-height:85vh;overflow-y:auto">
+    <div class="panel-handle"></div>
+    <div class="panel-title">Subjects & tasks</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="tab-btn active" id="tab-subjects-btn" onclick="switchTab('subjects')">Subjects</button>
+      <button class="tab-btn" id="tab-tasks-btn" onclick="switchTab('tasks')">Base tasks</button>
+    </div>
+
+    <!-- SUBJECTS TAB -->
+    <div id="tab-subjects">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Drag ☰ to reorder subjects in the schedule.</p>
+      <div id="subjects-list"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <button class="panel-btn" onclick="closeManageSubjects();openAddSubject()" style="width:100%;text-align:center">+ Add new subject</button>
+      </div>
+    </div>
+
+    <!-- BASE TASKS TAB -->
+    <div id="tab-tasks" style="display:none">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px">Remove individual tasks from the base schedule. Removed tasks are hidden but your progress is preserved.</p>
+      <div id="base-tasks-list"></div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <button class="panel-btn danger" onclick="restoreAllTasks()" style="width:100%;text-align:center">Restore all removed tasks</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGELOG PANEL -->
+<div class="panel-overlay" id="changelog-overlay" onclick="closeChangelog(event)">
+  <div class="panel" style="max-height:90vh;overflow-y:auto">
+    <div class="panel-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="panel-title" style="margin-bottom:0">Change history</div>
+      <button class="panel-btn" onclick="closeChangelog()">Close</button>
+    </div>
+    <div id="changelog-content"></div>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="panel-overlay" id="settings-overlay" onclick="closeSettings(event)">
+  <div class="panel">
+    <div class="panel-handle"></div>
+    <div class="panel-title">Settings</div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Connected as</div>
+        <div class="panel-row-sub" id="settings-user">—</div>
+      </div>
+      <button class="panel-btn" onclick="reconnect()">Change</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Sync status</div>
+        <div class="panel-row-sub" id="settings-sync">—</div>
+      </div>
+      <button class="panel-btn" onclick="forceSync()">Sync now</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Reset all progress</div>
+        <div class="panel-row-sub">Cannot be undone</div>
+      </div>
+      <button class="panel-btn danger" onclick="resetProgress()">Reset</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Anthropic API key</div>
+        <div class="panel-row-sub">Rotate or update your key</div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openHelp('apikey')">How to</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Phase 2–4</div>
+        <div class="panel-row-sub">Coming soon</div>
+      </div>
+      <button class="panel-btn" onclick="showToast('Phases 2–4 coming soon! 🚀')">Preview</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">About this app</div>
+        <div class="panel-row-sub">What it does · built by Claude</div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openHelp('about')">View</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Help & security guide</div>
+        <div class="panel-row-sub">API key safety, Supabase, GitHub</div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openHelp('security')">View</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Change history</div>
+        <div class="panel-row-sub" id="settings-version"></div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openChangelog()">View</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP PANEL -->
+<div class="panel-overlay" id="help-overlay" onclick="closeHelp(event)">
+  <div class="panel" style="max-height:90vh;overflow-y:auto">
+    <div class="panel-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="panel-title" style="margin-bottom:0" id="help-title">Help</div>
+      <button class="panel-btn" onclick="closeHelp()">Close</button>
+    </div>
+    <div id="help-content"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const PHASES = [{
+  // ════════════════════════════════════════════════════
+  // TEMPLATE — Replace this with your schedule data
+  // Ask Claude: "Build me a roadmap for [your topic]
+  //              using this template file"
+  // Claude will fill in weeks, days and tasks for you.
+  // ════════════════════════════════════════════════════
+  id: 1, title: "Phase 1 — Your Schedule", color: "#6366f1",
+  weeks: [
+    { week: 1, days: [
+      { date: "Mon 1 Jun 2026", label: "Day 1", tasks: [
+        { id:"t-1-1", time:"Morning", text:"Your first task — ask Claude to generate this", resource:"Your resource", url:"https://example.com", tag:"Topic" },
+        { id:"t-1-2", time:"Afternoon", text:"Your second task", resource:"Your resource", url:"https://example.com", tag:"Topic" },
+      ]},
+    ]},
+  ]
+}];
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const SUPABASE_URL  = 'YOUR_SUPABASE_URL'; // ← paste your Supabase project URL
+const SUPABASE_KEY  = 'YOUR_SUPABASE_ANON_KEY'; // ← paste your Supabase anon key
+const SUPABASE_USER = 'my-roadmap'; // ← change this per roadmap (e.g. 'spanish', 'fitness')
+const APP_VERSION   = '1.00';
+
+// ── CHANGELOG ──
+// Add a new entry here with every update
+const CHANGELOG = [
+  {
+    version: '1.00',
+    date: new Date().toISOString().slice(0,10),
+    changes: [
+      'Initial setup from roadmap_template.html',
+      'Replace PHASES data with your schedule',
+      'Update SUPABASE_USER to a unique name for this roadmap',
+    ]
+  },
+];
+
+let sbClient = null;
+let userId = SUPABASE_USER;
+let checked = {};
+let notes = {};
+let completedAt = {};
+let activeFilter = 'All';
+let syncMode = 'offline';
+let subjects = [];
+let removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
+
+const allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
+const totalCount = allTasks.length;
+const taskById = {};
+allTasks.forEach(t => taskById[t.id] = t);
+
+// ══════════════════════════════════════════
+// DYNAMIC SCHEDULE ENGINE
+// Completing a task early pulls the next uncompleted
+// task of the same category into the current slot.
+// ══════════════════════════════════════════
+function buildDynamicSchedule() {
+  const visibleTasks = allTasks.filter(t => !removedTasks.has(t.id));
+
+  const queueByTag = {};
+  visibleTasks.forEach(t => {
+    if (!queueByTag[t.tag]) queueByTag[t.tag] = [];
+    queueByTag[t.tag].push(t);
+  });
+
+  const pendingByTag = {};
+  Object.keys(queueByTag).forEach(tag => {
+    pendingByTag[tag] = queueByTag[tag].filter(t => !checked[t.id]);
+  });
+
+  const pendingIdx = {};
+  Object.keys(pendingByTag).forEach(tag => pendingIdx[tag] = 0);
+
+  // Build flat indexed schedule
+  const schedule = [];
+  PHASES.forEach((phase, phaseIdx) => {
+    phase.weeks.forEach((week, weekIdx) => {
+      week.days.forEach((day, dayIdx) => {
+        const dynamicTasks = day.tasks
+          .filter(orig => !removedTasks.has(orig.id))
+          .map(orig => {
+            if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
+            const pending = pendingByTag[orig.tag] || [];
+            if (pendingIdx[orig.tag] < pending.length) {
+              const next = pending[pendingIdx[orig.tag]++];
+              return { ...next, _status: 'pending', _movedUp: next.id !== orig.id };
+            }
+            return null;
+          }).filter(Boolean);
+
+        schedule.push({ phaseIdx, weekIdx, dayIdx, day, dynamicTasks });
+      });
+    });
+  });
+
+  // Merge custom subjects into schedule
+  subjects.forEach(subject => {
+    const pendingSubjectTasks = subject.tasks.filter(t => !checked[t.id]);
+    let subjPendingIdx = 0;
+
+    schedule.forEach(entry => {
+      const weekNum   = entry.weekIdx + 1;
+      const dayOfWeek = entry.dayIdx + 1;
+      const originalSlot = subject.tasks.find(t => t.week === weekNum && t.day === dayOfWeek);
+      if (!originalSlot) return;
+
+      if (checked[originalSlot.id]) {
+        entry.dynamicTasks.push({ ...originalSlot, _status: 'done', _movedUp: false });
+      } else if (subjPendingIdx < pendingSubjectTasks.length) {
+        const next = pendingSubjectTasks[subjPendingIdx++];
+        entry.dynamicTasks.push({ ...next, _status: 'pending', _movedUp: next.id !== originalSlot.id });
+      }
+    });
+  });
+
+  // Inject tag colour styles
+  injectSubjectStyles();
+
+  return schedule;
+}
+
+// ══════════════════════════════════════════
+// AUTO CONNECT
+// ══════════════════════════════════════════
+async function autoConnect() {
+  try {
+    const { createClient } = window.supabase;
+    sbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { data, error } = await sbClient
+      .from('ios_ai_progress')
+      .select('task_id, done, note, completed_at')
+      .eq('user_id', userId);
+    if (error) throw error;
+
+    checked = {}; notes = {}; completedAt = {};
+    (data || []).forEach(row => {
+      if (row.done) checked[row.task_id] = true;
+      if (row.note) notes[row.task_id] = row.note;
+      if (row.completed_at) completedAt[row.task_id] = row.completed_at;
+    });
+    saveLocal();
+    syncMode = 'live';
+    updateSyncDot('live');
+
+    sbClient.channel('progress-changes')
+      .on('postgres_changes', {
+        event: '*', schema: 'public',
+        table: 'ios_ai_progress',
+        filter: `user_id=eq.${userId}`
+      }, (payload) => {
+        if (payload.new) {
+          const r = payload.new;
+          checked[r.task_id]     = r.done;
+          notes[r.task_id]       = r.note || '';
+          completedAt[r.task_id] = r.completed_at || '';
+          renderAll();
+        }
+      }).subscribe();
+
+  } catch(e) {
+    syncMode = 'offline';
+    updateSyncDot('offline');
+    showToast('Supabase offline — using local storage');
+    loadLocal();
+  }
+
+  document.getElementById('settings-user').textContent = userId;
+  document.getElementById('settings-sync').textContent =
+    syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
+  document.getElementById('settings-version').textContent = 'Current version: v' + APP_VERSION;
+  await loadSubjects();
+  await loadRemovedTasks();
+  await syncChangelog();
+  rebuildFilterChips();
+  renderAll();
+}
+
+function saveLocal() {
+  localStorage.setItem('checked_local',     JSON.stringify(checked));
+  localStorage.setItem('notes_local',       JSON.stringify(notes));
+  localStorage.setItem('completedAt_local', JSON.stringify(completedAt));
+}
+
+function loadLocal() {
+  checked     = JSON.parse(localStorage.getItem('checked_local')     || '{}');
+  notes       = JSON.parse(localStorage.getItem('notes_local')       || '{}');
+  completedAt = JSON.parse(localStorage.getItem('completedAt_local') || '{}');
+}
+
+// ══════════════════════════════════════════
+// SYNC — schema-resilient, ID-based
+// ══════════════════════════════════════════
+async function syncTask(taskId, done) {
+  if (done) completedAt[taskId] = new Date().toISOString();
+  else delete completedAt[taskId];
+  saveLocal();
+  if (syncMode !== 'live' || !sbClient) return;
+  updateSyncDot('syncing');
+  try {
+    await sbClient.from('ios_ai_progress').upsert({
+      user_id: userId, task_id: taskId, done,
+      note: notes[taskId] || '',
+      completed_at: done ? completedAt[taskId] : null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,task_id' });
+    updateSyncDot('live');
+  } catch(e) {
+    updateSyncDot('offline');
+    showToast('Sync failed — saved locally');
+  }
+}
+
+async function syncNote(taskId, note) {
+  notes[taskId] = note;
+  saveLocal();
+  if (syncMode !== 'live' || !sbClient) return;
+  updateSyncDot('syncing');
+  try {
+    await sbClient.from('ios_ai_progress').upsert({
+      user_id: userId, task_id: taskId,
+      done: !!checked[taskId], note,
+      completed_at: completedAt[taskId] || null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,task_id' });
+    updateSyncDot('live');
+  } catch(e) { updateSyncDot('offline'); }
+}
+
+async function forceSync() {
+  if (syncMode !== 'live' || !sbClient) { showToast('Not connected to Supabase'); return; }
+  updateSyncDot('syncing');
+  try {
+    const ids = [...new Set([...Object.keys(checked), ...Object.keys(notes)])];
+    const rows = ids.map(task_id => ({
+      user_id: userId, task_id,
+      done: !!checked[task_id],
+      note: notes[task_id] || '',
+      completed_at: completedAt[task_id] || null,
+      updated_at: new Date().toISOString()
+    }));
+    if (rows.length > 0)
+      await sbClient.from('ios_ai_progress').upsert(rows, { onConflict: 'user_id,task_id' });
+    updateSyncDot('live');
+    showToast('Synced successfully ✓');
+    closeSettings();
+  } catch(e) {
+    updateSyncDot('offline');
+    showToast('Sync failed');
+  }
+}
+
+function updateSyncDot(state) {
+  const dot   = document.getElementById('sync-dot');
+  const label = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + (state === 'live' ? '' : state);
+  label.textContent = state === 'live' ? 'LIVE' : state === 'syncing' ? 'SYNC...' : 'OFFLINE';
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderAll() { updateStats(); renderWeeks(); }
+
+function updateStats() {
+  const done = allTasks.filter(t => checked[t.id]).length;
+  const pct  = Math.round((done / totalCount) * 100);
+  document.getElementById('ring-pct').textContent   = pct + '%';
+  document.getElementById('ring-total').textContent = done + '/' + totalCount;
+  const circ = 213.6;
+  document.getElementById('ring-fg').style.strokeDashoffset = circ - (circ * pct / 100);
+
+  const today = new Date().toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+  const todayTasks = allTasks.filter(t => {
+    const day = PHASES.flatMap(p => p.weeks.flatMap(w => w.days)).find(d => d.tasks.includes(t));
+    return day && day.date === today;
+  });
+  const todayDone  = todayTasks.filter(t => checked[t.id]).length;
+  const todayTotal = todayTasks.length || 4;
+  document.getElementById('stat-today').textContent = todayDone + '/' + todayTotal;
+  document.getElementById('bar-today').style.width  = Math.round((todayDone / todayTotal) * 100) + '%';
+
+  const weekTasks = PHASES[0].weeks.flatMap(w => w.days.flatMap(d => d.tasks)).slice(0, 20);
+  const weekDone  = weekTasks.filter(t => checked[t.id]).length;
+  document.getElementById('stat-week').textContent = weekDone + '/' + weekTasks.length;
+  document.getElementById('bar-week').style.width  = Math.round((weekDone / weekTasks.length) * 100) + '%';
+}
+
+function renderWeeks() {
+  const container = document.getElementById('main-content');
+  container.innerHTML = '';
+  const schedule = buildDynamicSchedule();
+
+  PHASES.forEach((phase, pi) => {
+    phase.weeks.forEach((week, wi) => {
+      const scheduledDays = schedule.filter(s => s.phaseIdx === pi && s.weekIdx === wi);
+      const weekTasks = scheduledDays.flatMap(s => s.dynamicTasks);
+      const weekDone  = weekTasks.filter(t => checked[t.id]).length;
+      const isOpen    = wi === 0;
+      const dateFrom  = week.days[0].date.split(' ').slice(1).join(' ');
+      const dateTo    = week.days[week.days.length-1].date.split(' ').slice(1).join(' ');
+
+      const block = document.createElement('div');
+      block.className = 'week-block';
+      block.style.animationDelay = (wi * 0.05) + 's';
+      block.innerHTML = `
+        <button class="week-header ${isOpen ? 'open' : ''}" onclick="toggleWeek(this)">
+          <div class="week-left">
+            <div class="week-dot" style="background:${phase.color}"></div>
+            <div>
+              <div class="week-title">Week ${week.week}</div>
+              <div class="week-dates">${dateFrom} – ${dateTo}</div>
+            </div>
+          </div>
+          <div class="week-right">
+            <span class="week-count" style="color:${weekDone===weekTasks.length?'var(--green)':''}">${weekDone}/${weekTasks.length}</span>
+            <span class="week-chevron ${isOpen ? 'open' : ''}">▼</span>
+          </div>
+        </button>
+        <div class="days-container ${isOpen ? 'open' : ''}" id="days-${pi}-${wi}">
+          ${scheduledDays.map((s, di) => renderDay(s.day, s.dynamicTasks, pi, wi, di)).join('')}
+        </div>`;
+      container.appendChild(block);
+    });
+  });
+}
+
+function renderDay(day, dynamicTasks, pi, wi, di) {
+  const tasks   = activeFilter === 'All' ? dynamicTasks : dynamicTasks.filter(t => t.tag === activeFilter);
+  const dayDone = dynamicTasks.filter(t => checked[t.id]).length;
+  const allDone = dynamicTasks.length > 0 && dayDone === dynamicTasks.length;
+  if (tasks.length === 0) return '';
+  return `
+    <div class="day-block">
+      <button class="day-header ${allDone?'complete':''}" onclick="toggleDay(this,'${pi}-${wi}-${di}')">
+        <div class="day-left">
+          <div class="day-check ${allDone?'done':''}">${allDone?'✓':''}</div>
+          <div>
+            <div class="day-label">${day.label}</div>
+            <div class="day-date">${day.date}</div>
+          </div>
+        </div>
+        <div class="day-right">
+          <span class="day-progress" style="color:${allDone?'var(--green)':''}">${dayDone}/${dynamicTasks.length}</span>
+          <span style="color:var(--text3);font-size:11px" id="chev-${pi}-${wi}-${di}">▼</span>
+        </div>
+      </button>
+      <div class="tasks-wrap" id="tasks-${pi}-${wi}-${di}">
+        ${tasks.map(task => renderTask(task)).join('')}
+      </div>
+    </div>`;
+}
+
+function renderTask(task) {
+  const isDone    = !!checked[task.id];
+  const note      = (notes[task.id] || '').slice(0, 30);
+  const remaining = 30 - note.length;
+  const countCls  = remaining <= 5 ? 'over' : remaining <= 10 ? 'warn' : '';
+  const movedBadge = task._movedUp
+    ? `<span style="font-size:10px;background:#fef9c3;color:#854d0e;padding:1px 7px;border-radius:99px;font-weight:500;margin-left:4px">moved up ↑</span>`
+    : '';
+
+  // Show × for ALL tasks — base tasks go to removedTasks, subject tasks removed from subject
+  const removeBtn = `<button onclick="event.stopPropagation();quickRemoveTask('${task.id}')"
+      style="background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:1px"
+      title="Remove this task from schedule">×</button>`;
+
+  return `
+    <div class="task-item ${isDone?'done':''}" onclick="toggleTask('${task.id}')">
+      <div class="task-checkbox">${isDone?'✓':''}</div>
+      <div class="task-body">
+        <div class="task-meta">
+          <span class="task-tag tag-${task.tag}">${task.tag}</span>
+          <span class="task-time">${task.time}</span>
+          ${movedBadge}
+        </div>
+        <div class="task-text">${task.text}</div>
+        <div class="task-resource">
+          <span style="font-size:11px;color:var(--text3)">📚</span>
+          <a href="${task.url}" target="_blank" onclick="event.stopPropagation()">${task.resource} ↗</a>
+        </div>
+        <div class="task-note-wrap" onclick="event.stopPropagation()">
+          <input class="task-note-input" type="text" maxlength="30"
+            placeholder="Add a note..."
+            value="${note.replace(/"/g,'&quot;')}"
+            id="note-${task.id}"
+            oninput="onNoteInput('${task.id}',this)"
+            onblur="onNoteBlur('${task.id}',this.value)"/>
+          <span class="task-note-count ${countCls}" id="note-count-${task.id}">${remaining}</span>
+        </div>
+      </div>
+      ${removeBtn}
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// INTERACTIONS
+// ══════════════════════════════════════════
+function toggleTask(taskId) {
+  checked[taskId] = !checked[taskId];
+  syncTask(taskId, checked[taskId]);
+  renderAll();
+  if (checked[taskId]) showToast('Task complete — schedule updated ✓');
+}
+
+async function quickRemoveTask(taskId) {
+  const isBaseTask = !!taskById[taskId];
+
+  if (isBaseTask) {
+    // Base task — add to removedTasks set
+    removedTasks.add(taskId);
+    await saveRemovedTasks();
+    showToast('Task removed — restore via Subjects → Base tasks');
+  } else {
+    // Subject task — remove from the subject's task list
+    let removed = false;
+    for (const subject of subjects) {
+      const idx = subject.tasks.findIndex(t => t.id === taskId);
+      if (idx !== -1) {
+        subject.tasks.splice(idx, 1);
+        removed = true;
+        await saveSubject(subject, true); // true = update existing, not push new
+        break;
+      }
+    }
+    if (removed) showToast('Task removed from subject ✓');
+  }
+  renderAll();
+}
+
+let noteTimers = {};
+function onNoteInput(taskId, input) {
+  const val = input.value.slice(0, 30);
+  input.value = val;
+  const remaining = 30 - val.length;
+  const countEl = document.getElementById('note-count-' + taskId);
+  if (countEl) {
+    countEl.textContent = remaining;
+    countEl.className = 'task-note-count' + (remaining <= 5 ? ' over' : remaining <= 10 ? ' warn' : '');
+  }
+  clearTimeout(noteTimers[taskId]);
+  noteTimers[taskId] = setTimeout(() => syncNote(taskId, val), 1000);
+}
+
+function onNoteBlur(taskId, val) {
+  clearTimeout(noteTimers[taskId]);
+  syncNote(taskId, val.slice(0, 30));
+}
+
+function toggleWeek(btn) {
+  const isOpen = btn.classList.contains('open');
+  btn.classList.toggle('open', !isOpen);
+  btn.nextElementSibling.classList.toggle('open', !isOpen);
+  btn.querySelector('.week-chevron').classList.toggle('open', !isOpen);
+}
+
+function toggleDay(btn, key) {
+  const wrap = document.getElementById('tasks-' + key);
+  const chev = document.getElementById('chev-' + key);
+  const isVisible = wrap.style.display !== 'none';
+  wrap.style.display = isVisible ? 'none' : 'block';
+  if (chev) chev.style.transform = isVisible ? 'rotate(-90deg)' : '';
+}
+
+function setFilter(filter, el) {
+  activeFilter = filter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderAll();
+}
+
+function openSettings() { document.getElementById('settings-overlay').classList.add('open'); }
+
+function closeSettings(e) {
+  if (!e || e.target === document.getElementById('settings-overlay'))
+    document.getElementById('settings-overlay').classList.remove('open');
+}
+
+function reconnect() { closeSettings(); autoConnect(); showToast('Reconnecting...'); }
+
+async function resetProgress() {
+  if (!confirm('Reset all progress and notes? This cannot be undone.')) return;
+  checked = {}; notes = {}; completedAt = {};
+  saveLocal();
+  if (syncMode === 'live' && sbClient)
+    await sbClient.from('ios_ai_progress').delete().eq('user_id', userId);
+  renderAll();
+  closeSettings();
+  showToast('Progress reset');
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════════
+// CURRICULUM ENGINE
+// Subjects are stored in Supabase (ios_ai_subjects table)
+// and locally. Each subject contains AI-generated tasks
+// that are merged into the dynamic schedule.
+// Progress is preserved by task_id even when curriculum changes.
+// ══════════════════════════════════════════
+
+let selectedHours = 2;
+let selectedColor = '#6366f1';
+let selectedMode  = 'claude'; // 'claude' | 'manual'
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.getElementById('mode-claude').classList.toggle('active', mode === 'claude');
+  document.getElementById('mode-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('as-claude-fields').style.display = mode === 'claude' ? 'flex' : 'none';
+  document.getElementById('as-manual-fields').style.display = mode === 'manual' ? 'flex' : 'none';
+  document.getElementById('as-claude-fields').style.flexDirection = 'column';
+  document.getElementById('as-manual-fields').style.flexDirection = 'column';
+  const btn = document.getElementById('as-generate-btn');
+  btn.innerHTML = mode === 'claude'
+    ? 'Generate schedule with Claude ✨'
+    : 'Generate tasks with my resource ✍';
+}
+
+// ── SUBJECT PERSISTENCE ──
+async function loadSubjects() {
+  const local = localStorage.getItem('subjects_local');
+  subjects = local ? JSON.parse(local) : [];
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    const { data, error } = await sbClient
+      .from('ios_ai_subjects')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      subjects = data.map(r => ({ ...r, tasks: JSON.parse(r.tasks_json || '[]') }));
+      localStorage.setItem('subjects_local', JSON.stringify(subjects));
+    }
+  } catch(e) { console.warn('Could not load subjects from Supabase:', e.message); }
+}
+
+async function saveSubject(subject, updateExisting = false) {
+  if (!updateExisting) subjects.push(subject);
+  localStorage.setItem('subjects_local', JSON.stringify(subjects));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    await sbClient.from('ios_ai_subjects').upsert({
+      user_id: userId,
+      id: subject.id,
+      name: subject.name,
+      tag: subject.tag,
+      color: subject.color,
+      hours_per_week: subject.hoursPerWeek,
+      start_week: subject.startWeek,
+      tasks_json: JSON.stringify(subject.tasks),
+      created_at: subject.createdAt || new Date().toISOString()
+    }, { onConflict: 'id' });
+  } catch(e) { console.warn('Could not save subject:', e.message); }
+}
+
+async function deleteSubject(subjectId) {
+  subjects = subjects.filter(s => s.id !== subjectId);
+  localStorage.setItem('subjects_local', JSON.stringify(subjects));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    await sbClient.from('ios_ai_subjects').delete().eq('id', subjectId).eq('user_id', userId);
+  } catch(e) { console.warn('Could not delete subject:', e.message); }
+}
+
+// ── ADD SUBJECT UI ──
+function openAddSubject() {
+  document.getElementById('add-subject-overlay').classList.add('open');
+  document.getElementById('as-name').value = '';
+  document.getElementById('as-context').value = '';
+  document.getElementById('as-week').value = '1';
+  document.getElementById('as-apikey').value = localStorage.getItem('anthropic_api_key') || '';
+  document.getElementById('as-apikey-manual').value = localStorage.getItem('anthropic_api_key') || '';
+  document.getElementById('as-resource-name').value = '';
+  document.getElementById('as-resource-url').value = '';
+  document.getElementById('as-resource-desc').value = '';
+  document.getElementById('as-status').style.display = 'none';
+  document.getElementById('as-generate-btn').disabled = false;
+  // Reset mode to claude
+  selectMode('claude');
+  // Reset hour selection
+  document.querySelectorAll('.hours-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.hours-btn[data-hours="2"]').classList.add('active');
+  selectedHours = 2;
+  // Reset colour selection
+  document.querySelectorAll('.color-btn').forEach((b,i) => {
+    b.classList.remove('selected');
+    b.textContent = '';
+    if (i === 0) { b.classList.add('selected'); b.textContent = '✓'; }
+  });
+  selectedColor = '#6366f1';
+}
+
+function closeAddSubject(e) {
+  if (!e || e.target === document.getElementById('add-subject-overlay'))
+    document.getElementById('add-subject-overlay').classList.remove('open');
+}
+
+function selectHours(btn) {
+  document.querySelectorAll('.hours-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedHours = parseInt(btn.dataset.hours);
+}
+
+function selectColor(btn) {
+  document.querySelectorAll('.color-btn').forEach(b => { b.classList.remove('selected'); b.textContent = ''; });
+  btn.classList.add('selected');
+  btn.textContent = '✓';
+  selectedColor = btn.dataset.color;
+}
+
+// ── CLAUDE-POWERED TASK GENERATION ──
+async function generateSubject() {
+  const name      = document.getElementById('as-name').value.trim();
+  const startWeek = parseInt(document.getElementById('as-week').value) || 1;
+  const statusEl  = document.getElementById('as-status');
+  const btn       = document.getElementById('as-generate-btn');
+
+  if (!name) { showStatus('Please enter a subject name.', 'error'); return; }
+
+  const tag = name.replace(/\s+/g, '').slice(0, 12);
+  const totalWeeks  = 4;
+  const daysPerWeek = 5;
+  const hoursPerDay = selectedHours / daysPerWeek;
+  const sessionLabel = hoursPerDay >= 1
+    ? Math.round(hoursPerDay) + 'hr' + (hoursPerDay > 1 ? 's' : '')
+    : Math.round(hoursPerDay * 60) + 'min';
+
+  // ── MANUAL MODE ──
+  if (selectedMode === 'manual') {
+    const resourceName = document.getElementById('as-resource-name').value.trim();
+    const resourceUrl  = document.getElementById('as-resource-url').value.trim();
+    const resourceDesc = document.getElementById('as-resource-desc').value.trim();
+    const apiKey = document.getElementById('as-apikey-manual').value.trim()
+                   || localStorage.getItem('anthropic_api_key') || '';
+
+    if (!resourceName || !resourceUrl) {
+      showStatus('Please enter a resource name and URL.', 'error'); return;
+    }
+    if (!apiKey) { showStatus('Please enter your Anthropic API key.', 'error'); return; }
+    localStorage.setItem('anthropic_api_key', apiKey);
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="generating-spinner"></span>Generating task descriptions...';
+    showStatus('Using your resource — Claude writes task titles only (saves tokens)...', 'info');
+
+    const manualPrompt = `You are a curriculum designer. Generate a day-by-day learning schedule for "${name}" using this specific resource:
+
+Resource name: ${resourceName}
+Resource URL: ${resourceUrl}
+Description: ${resourceDesc || 'No description provided.'}
+
+Requirements:
+- ${selectedHours} hours per week across 5 days, roughly ${sessionLabel} per day
+- ${totalWeeks} weeks total starting from week ${startWeek}
+- Each task must use the resource name and URL provided above (all tasks link to the same resource)
+- Write specific, progressive task descriptions that guide what to study each day from that resource
+- Descriptions should reference specific topics or sections to study
+
+Return ONLY a valid JSON array with exactly ${totalWeeks * daysPerWeek} task objects. No explanation, no markdown.
+
+Each object:
+{
+  "id": "custom-${tag}-W1D1",
+  "week": 1,
+  "day": 1,
+  "time": "${sessionLabel}",
+  "text": "Specific description of what to study today",
+  "resource": "${resourceName}",
+  "url": "${resourceUrl}",
+  "tag": "${tag}"
+}
+
+Use id format: "custom-${tag}-W{week}D{day}". Weeks 1–${totalWeeks}, days 1–5.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 3000,
+          messages: [{ role: 'user', content: manualPrompt }]
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || 'API error');
+      const text = data.content?.find(b => b.type === 'text')?.text || '';
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('Could not parse tasks from Claude response');
+      const tasks = JSON.parse(jsonMatch[0]);
+      if (!Array.isArray(tasks) || tasks.length === 0) throw new Error('Empty task list');
+      await _finishSubjectCreation(name, tag, startWeek, tasks, btn);
+    } catch(e) {
+      showStatus('Error: ' + e.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = 'Try again ↺';
+      btn.onclick = generateSubject;
+    }
+    return;
+  }
+
+  // ── CLAUDE MODE ──
+  const context = document.getElementById('as-context').value.trim();
+  const apiKey  = document.getElementById('as-apikey').value.trim()
+                  || localStorage.getItem('anthropic_api_key') || '';
+
+  if (!apiKey) { showStatus('Please enter your Anthropic API key.', 'error'); return; }
+  localStorage.setItem('anthropic_api_key', apiKey);
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="generating-spinner"></span>Claude is building your schedule...';
+  showStatus('Calling Claude API — this takes about 10 seconds...', 'info');
+
+  const prompt = `You are a curriculum designer. Generate a day-by-day learning schedule for "${name}".
+
+Context from learner: ${context || 'No additional context provided.'}
+
+Requirements:
+- ${selectedHours} hours per week split across 5 days (Mon–Fri), so roughly ${sessionLabel} per day
+- Cover ${totalWeeks} weeks starting from week ${startWeek}
+- Each week should build progressively on the previous
+- Include specific resources (free online resources, YouTube channels, official docs)
+- Be practical and project-based where possible
+
+Return ONLY a valid JSON array with exactly ${totalWeeks * daysPerWeek} task objects. No explanation, no markdown, just the JSON array.
+
+Each task object must have exactly these fields:
+{
+  "id": "custom-${tag}-W1D1",
+  "week": 1,
+  "day": 1,
+  "time": "${sessionLabel}",
+  "text": "Specific task description",
+  "resource": "Resource name",
+  "url": "https://actual-url.com",
+  "tag": "${tag}"
+}
+
+Use id format: "custom-${tag}-W{week}D{day}" e.g. "custom-${tag}-W1D1", "custom-${tag}-W1D2" etc.
+Weeks go from 1 to ${totalWeeks}, days 1 to 5 per week.
+Make sure all URLs are real, working URLs.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'API error');
+    const text = data.content?.find(b => b.type === 'text')?.text || '';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error('Could not parse task list from Claude response');
+    const tasks = JSON.parse(jsonMatch[0]);
+    if (!Array.isArray(tasks) || tasks.length === 0) throw new Error('Empty task list returned');
+    await _finishSubjectCreation(name, tag, startWeek, tasks, btn);
+  } catch(e) {
+    showStatus('Error: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = 'Try again ↺';
+    btn.onclick = generateSubject;
+  }
+}
+
+async function _finishSubjectCreation(name, tag, startWeek, tasks, btn) {
+  const offsetTasks = tasks.map(t => ({
+    ...t,
+    week: (t.week - 1) + startWeek,
+    id: t.id.replace(`-W${t.week}D`, `-W${(t.week-1)+startWeek}D`)
+  }));
+  const subject = {
+    id: 'subj-' + Date.now(),
+    name, tag, color: selectedColor,
+    hoursPerWeek: selectedHours,
+    startWeek,
+    tasks: offsetTasks,
+    createdAt: new Date().toISOString()
+  };
+  await saveSubject(subject);
+  rebuildFilterChips();
+  showStatus(`✓ ${offsetTasks.length} tasks created for "${name}" — schedule updated!`, 'success');
+  btn.innerHTML = '✓ Added! Close this panel';
+  btn.disabled = false;
+  btn.onclick = () => { closeAddSubject(); renderAll(); };
+  renderAll();
+}
+
+function showStatus(msg, type) {
+  const el = document.getElementById('as-status');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.style.background = type === 'error' ? '#fee2e2' : type === 'success' ? '#dcfce7' : '#eff6ff';
+  el.style.color      = type === 'error' ? '#b91c1c' : type === 'success' ? '#15803d' : '#1d4ed8';
+  el.style.border     = `1px solid ${type === 'error' ? '#fca5a5' : type === 'success' ? '#86efac' : '#93c5fd'}`;
+}
+
+// ── MANAGE SUBJECTS UI ──
+let activeTab = 'subjects';
+let dragSrcIdx = null;
+
+function openManageSubjects() {
+  switchTab('subjects');
+  renderSubjectsList();
+  document.getElementById('manage-subjects-overlay').classList.add('open');
+}
+
+function closeManageSubjects(e) {
+  if (!e || e.target === document.getElementById('manage-subjects-overlay'))
+    document.getElementById('manage-subjects-overlay').classList.remove('open');
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tab-subjects').style.display = tab === 'subjects' ? 'block' : 'none';
+  document.getElementById('tab-tasks').style.display    = tab === 'tasks'    ? 'block' : 'none';
+  document.getElementById('tab-subjects-btn').classList.toggle('active', tab === 'subjects');
+  document.getElementById('tab-tasks-btn').classList.toggle('active', tab === 'tasks');
+  if (tab === 'tasks') renderBaseTasksList();
+}
+
+// ── SUBJECT LIST WITH DRAG REORDER ──
+function renderSubjectsList() {
+  const el = document.getElementById('subjects-list');
+  if (subjects.length === 0) {
+    el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:16px 0">No custom subjects yet. Add your first one!</p>';
+    return;
+  }
+  el.innerHTML = subjects.map((s, i) => `
+    <div class="subject-chip" id="subj-row-${i}"
+      draggable="true"
+      ondragstart="onSubjDragStart(event,${i})"
+      ondragover="onSubjDragOver(event,${i})"
+      ondrop="onSubjDrop(event,${i})"
+      ondragend="onSubjDragEnd()">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <span class="drag-handle" title="Drag to reorder">☰</span>
+        <div class="subject-chip-dot" style="background:${s.color}"></div>
+        <div>
+          <div style="font-size:14px;font-weight:500;color:var(--text)">${s.name}</div>
+          <div style="font-size:11px;color:var(--text3)">${s.hoursPerWeek} hrs/week · week ${s.startWeek} · ${s.tasks.length} tasks</div>
+        </div>
+      </div>
+      <button class="panel-btn danger" onclick="removeSubject('${s.id}')"
+        style="font-size:11px;padding:6px 10px;white-space:nowrap">
+        Remove ×
+      </button>
+    </div>
+  `).join('');
+}
+
+function onSubjDragStart(e, idx) {
+  dragSrcIdx = idx;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function onSubjDragOver(e, idx) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  document.querySelectorAll('.subject-chip').forEach(el => el.classList.remove('drag-over'));
+  if (idx !== dragSrcIdx) document.getElementById('subj-row-' + idx).classList.add('drag-over');
+}
+
+async function onSubjDrop(e, idx) {
+  e.preventDefault();
+  if (dragSrcIdx === null || dragSrcIdx === idx) return;
+  const moved = subjects.splice(dragSrcIdx, 1)[0];
+  subjects.splice(idx, 0, moved);
+  localStorage.setItem('subjects_local', JSON.stringify(subjects));
+  if (syncMode === 'live' && sbClient) {
+    // Update order by re-saving all subjects with fresh timestamps
+    for (let i = 0; i < subjects.length; i++) {
+      await sbClient.from('ios_ai_subjects').upsert({
+        ...subjects[i],
+        tasks_json: JSON.stringify(subjects[i].tasks),
+        user_id: userId,
+        sort_order: i
+      }, { onConflict: 'id' }).catch(() => {});
+    }
+  }
+  renderSubjectsList();
+  renderAll();
+  showToast('Subject order updated ✓');
+}
+
+function onSubjDragEnd() {
+  dragSrcIdx = null;
+  document.querySelectorAll('.subject-chip').forEach(el => {
+    el.classList.remove('dragging', 'drag-over');
+  });
+}
+
+async function removeSubject(subjectId) {
+  if (!confirm('Remove this subject? Your progress on completed tasks will be preserved in the database, but the tasks will no longer appear in the schedule.')) return;
+  await deleteSubject(subjectId);
+  rebuildFilterChips();
+  renderSubjectsList();
+  renderAll();
+  showToast('Subject removed — progress preserved ✓');
+}
+
+// ── BASE TASK REMOVAL ──
+async function saveRemovedTasks() {
+  const arr = [...removedTasks];
+  localStorage.setItem('removed_tasks', JSON.stringify(arr));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    await sbClient.from('ios_ai_subjects').upsert({
+      id: `removed-tasks-${userId}`,
+      user_id: userId,
+      name: '__removed_tasks__',
+      tasks_json: JSON.stringify(arr),
+      created_at: new Date().toISOString()
+    }, { onConflict: 'id' });
+  } catch(e) {}
+}
+
+async function loadRemovedTasks() {
+  removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    const { data } = await sbClient.from('ios_ai_subjects')
+      .select('tasks_json')
+      .eq('id', `removed-tasks-${userId}`)
+      .single();
+    if (data?.tasks_json) {
+      removedTasks = new Set(JSON.parse(data.tasks_json));
+      localStorage.setItem('removed_tasks', JSON.stringify([...removedTasks]));
+    }
+  } catch(e) {}
+}
+
+function renderBaseTasksList() {
+  const el = document.getElementById('base-tasks-list');
+  const grouped = {};
+  allTasks.forEach(t => {
+    if (!grouped[t.tag]) grouped[t.tag] = [];
+    grouped[t.tag].push(t);
+  });
+
+  el.innerHTML = Object.entries(grouped).map(([tag, tasks]) => `
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${tag}</div>
+      ${tasks.map(t => {
+        const isRemoved = removedTasks.has(t.id);
+        return `
+          <div class="task-remove-row ${isRemoved ? 'removed' : ''}">
+            <div style="flex:1">
+              <div class="task-remove-label">${t.text}</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">${t.time}</div>
+            </div>
+            <button class="task-toggle-btn ${isRemoved ? 'restore' : 'remove'}"
+              onclick="toggleTaskRemoval('${t.id}')">
+              ${isRemoved ? 'Restore' : 'Remove'}
+            </button>
+          </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+}
+
+async function toggleTaskRemoval(taskId) {
+  if (removedTasks.has(taskId)) removedTasks.delete(taskId);
+  else removedTasks.add(taskId);
+  await saveRemovedTasks();
+  renderBaseTasksList();
+  renderAll();
+}
+
+async function restoreAllTasks() {
+  if (!confirm('Restore all removed tasks to the schedule?')) return;
+  removedTasks.clear();
+  await saveRemovedTasks();
+  renderBaseTasksList();
+  renderAll();
+  showToast('All tasks restored ✓');
+}
+
+// ── CHANGELOG ──
+async function syncChangelog() {
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    // Upsert each version entry — idempotent, safe to call on every load
+    const rows = CHANGELOG.map(entry => ({
+      version: entry.version,
+      date: entry.date,
+      changes_json: JSON.stringify(entry.changes),
+      updated_at: new Date().toISOString()
+    }));
+    await sbClient.from('ios_ai_changelog').upsert(rows, { onConflict: 'version' });
+  } catch(e) { console.warn('Changelog sync failed:', e.message); }
+}
+
+async function loadChangelog() {
+  // Always use the local CHANGELOG constant as source of truth
+  // Supabase is used as a persistent record, not as the display source
+  return CHANGELOG;
+}
+
+// ── FILTER CHIPS ──
+function rebuildFilterChips() {
+  const scroll = document.querySelector('.filter-scroll');
+  const baseTags = ['All', 'Typing', 'Swift', 'AI', 'PyTorch', 'Python', 'Review'];
+  const subjectTags = subjects.map(s => ({ tag: s.tag, name: s.name, color: s.color }));
+
+  scroll.innerHTML = baseTags.map(f =>
+    `<button class="filter-chip ${activeFilter===f?'active':''}" onclick="setFilter('${f}',this)">${f}</button>`
+  ).join('') + subjectTags.map(s =>
+    `<button class="filter-chip ${activeFilter===s.tag?'active':''}" onclick="setFilter('${s.tag}',this)" style="${activeFilter===s.tag?`background:${s.color}22;border-color:${s.color};color:${s.color}`:''}">
+      ${s.name}
+    </button>`
+  ).join('');
+}
+
+// ── MERGE SUBJECTS INTO DYNAMIC SCHEDULE ──
+// Subjects are merged directly inside buildDynamicSchedule above.
+// This section injects tag colour styles only.
+function injectSubjectStyles() {
+  subjects.forEach(s => {
+    const styleId = 'tag-style-' + s.tag;
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `.tag-${s.tag}{background:${s.color}22;color:${s.color};border:1px solid ${s.color}44}`;
+      document.head.appendChild(style);
+    }
+  });
+}
+
+// ── CHANGELOG UI ──
+function openChangelog() {
+  const el = document.getElementById('changelog-content');
+  // Render newest first
+  const sorted = [...CHANGELOG].reverse();
+  el.innerHTML = sorted.map((entry, i) => `
+    <div class="changelog-entry">
+      <div class="changelog-version">
+        <span class="changelog-version-num">v${entry.version}</span>
+        ${i === 0 ? '<span class="changelog-version-badge">Current</span>' : ''}
+        <span class="changelog-date">${entry.date}</span>
+      </div>
+      ${entry.changes.map(c => `
+        <div class="changelog-item">
+          <div class="changelog-bullet"></div>
+          <span>${c}</span>
+        </div>`).join('')}
+    </div>
+  `).join('');
+  document.getElementById('changelog-overlay').classList.add('open');
+}
+
+function closeChangelog(e) {
+  if (!e || e.target === document.getElementById('changelog-overlay'))
+    document.getElementById('changelog-overlay').classList.remove('open');
+}
+
+// ── HELP PANEL ──
+const HELP_CONTENT = {
+  about: {
+    title: 'About this app',
+    html: `
+      <div class="help-section">
+        <h3>What this app does</h3>
+        <p>This is a personal learning roadmap tracker built specifically for your journey into iOS development, AI, PyTorch, and touch typing.</p>
+        <div class="help-step">
+          <div class="help-step-num">☑</div>
+          <div class="help-step-text"><strong>Day-by-day schedule</strong> — a structured 4-week Phase 1 plan with tasks across Swift, AI, PyTorch, Python, and Typing</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">⚡</div>
+          <div class="help-step-text"><strong>Dynamic scheduling</strong> — complete a task early and the next task in that category automatically moves up to fill the slot</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">☁</div>
+          <div class="help-step-text"><strong>Cross-device sync</strong> — progress and notes are saved to Supabase and sync instantly across your Mac, iPhone, and any other device</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✨</div>
+          <div class="help-step-text"><strong>AI curriculum builder</strong> — add any new subject (e.g. JavaScript, React, SQL) and Claude generates a full day-by-day schedule for it using your Anthropic API key</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">📋</div>
+          <div class="help-step-text"><strong>Full control</strong> — remove individual tasks, reorder subjects, add notes to any task, and restore anything you've removed</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Created by Claude</h3>
+        <p>This entire app — every line of code, every feature, every design decision — was created by <strong>Claude</strong> (Anthropic's AI assistant) through a conversation with you.</p>
+        <p>No manual coding was involved. The app was built iteratively over a single conversation, evolving from a simple checklist into a full dynamic learning platform.</p>
+        <div class="help-safe">✓ Claude wrote 100% of the HTML, CSS, JavaScript, scheduling engine, Supabase integration, and curriculum generator</div>
+      </div>
+
+      <div class="help-section">
+        <h3>How to modify or extend this app</h3>
+        <p>To make any changes — add features, fix bugs, change the design, add new phases — you need to use the same Claude project where this was built.</p>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Open <a class="help-link" href="https://claude.ai" target="_blank">claude.ai</a> and go to your learning roadmap project</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Describe what you want to change in plain English — e.g. <em>"add a streak counter"</em> or <em>"change the colour scheme to dark mode"</em></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Claude will edit the file and give you a new version to download and push to GitHub</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">4</div>
+          <div class="help-step-text">Push to GitHub Pages — the change is live on all your devices within 2 minutes</div>
+        </div>
+        <div class="help-tip">💡 The full conversation history gives Claude context about every decision made. Starting a new conversation works too — just share the current HTML file as a starting point.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Version</h3>
+        <p style="color:var(--text3);font-size:12px">iOS & AI Learning Roadmap · v<span class="app-version-display"></span> · Built with Claude Sonnet · April 2026</p>
+      </div>
+    `
+  },
+  apikey: {
+    title: 'API key — how to get, rotate & stay safe',
+    html: `
+      <div class="help-section">
+        <h3>Getting your Anthropic API key</h3>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to <a class="help-link" href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> and sign in (or create a free account)</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Click <strong>API Keys</strong> in the left sidebar</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Click <strong>Create Key</strong> → give it a name like <em>learning-roadmap</em></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">4</div>
+          <div class="help-step-text">Copy the key immediately — <strong>you only see it once</strong></div>
+        </div>
+        <div class="help-tip">💡 Set a spending limit at console.anthropic.com → Settings → Limits. £5/month is plenty for generating dozens of subject schedules.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Rotating your key (if you suspect it was compromised)</h3>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to <a class="help-link" href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → <strong>API Keys</strong></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Click the <strong>trash icon</strong> next to your old key — it stops working immediately</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Click <strong>Create Key</strong> → copy the new key</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">4</div>
+          <div class="help-step-text">Paste your new key below and tap Update — it saves to this device's local storage</div>
+        </div>
+        <div style="margin-top:12px">
+          <input class="form-input" id="help-new-apikey" type="password" placeholder="Paste new sk-ant-... key here" autocomplete="off">
+          <button class="help-update-btn" onclick="updateApiKey()">Update API key on this device</button>
+        </div>
+        <div class="help-step" style="margin-top:14px">
+          <div class="help-step-num">5</div>
+          <div class="help-step-text">Repeat on each device — open the roadmap, tap <strong>⚙ Settings → API key → How to</strong>, paste the new key and tap Update</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Is my key safe?</h3>
+        <div class="help-safe">✓ Your key is stored only in this browser's local storage — not in GitHub, not in Supabase, not in the HTML file</div>
+        <div class="help-step" style="margin-top:12px">
+          <div class="help-step-num">?</div>
+          <div class="help-step-text">To verify the HTML file on GitHub is clean, run this in your terminal:</div>
+        </div>
+        <div class="help-code">grep -i "sk-ant" ios_learning_roadmap_v3.html</div>
+        <p>If it returns nothing, your key is not in the file. ✓</p>
+      </div>
+    `
+  },
+  security: {
+    title: 'Security & privacy guide',
+    html: `
+      <div class="help-section">
+        <h3>What is stored where</h3>
+        <div class="help-step">
+          <div class="help-step-num">📱</div>
+          <div class="help-step-text"><strong>This device only:</strong> Anthropic API key, cached progress</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">☁</div>
+          <div class="help-step-text"><strong>Supabase:</strong> Task progress (done/undone), notes, completion timestamps, subject curricula</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">⌥</div>
+          <div class="help-step-text"><strong>GitHub:</strong> Only the HTML app code — no keys, no personal data</div>
+        </div>
+        <div class="help-safe">✓ No passwords or sensitive data ever touch GitHub</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Can anyone modify your GitHub file?</h3>
+        <p>No — only you can push to your repository. To add extra protection:</p>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to your GitHub repo → <strong>Settings → Branches</strong></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Add a rule for <strong>main</strong> branch</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Tick <strong>Require pull request reviews before merging</strong></div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Supabase security</h3>
+        <p>Your Supabase anon key is in the HTML file. Since the data in your table (task progress and notes) is not sensitive, this is acceptable. For extra protection:</p>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to <a class="help-link" href="https://supabase.com" target="_blank">supabase.com</a> → your project → <strong>Authentication → Policies</strong></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Enable <strong>Row Level Security</strong> on the <em>ios_ai_progress</em> table — this prevents anyone with your anon key from reading other users' data</div>
+        </div>
+        <div class="help-code">ALTER TABLE ios_ai_progress ENABLE ROW LEVEL SECURITY;</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Quick security checklist</h3>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Set an Anthropic spending limit at console.anthropic.com → Settings → Limits</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Enable branch protection on GitHub main branch</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Enable Row Level Security in Supabase</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Rotate your Anthropic key every few months</div>
+        </div>
+      </div>
+    `
+  }
+};
+
+function openHelp(section) {
+  const content = HELP_CONTENT[section] || HELP_CONTENT.about;
+  document.getElementById('help-title').textContent = content.title;
+  document.getElementById('help-content').innerHTML = content.html;
+  // Inject version number wherever needed
+  document.querySelectorAll('.app-version-display').forEach(el => el.textContent = APP_VERSION);
+  document.getElementById('help-overlay').classList.add('open');
+}
+
+function closeHelp(e) {
+  if (!e || e.target === document.getElementById('help-overlay'))
+    document.getElementById('help-overlay').classList.remove('open');
+}
+
+function updateApiKey() {
+  const key = document.getElementById('help-new-apikey').value.trim();
+  if (!key) { showToast('Please paste your new API key first'); return; }
+  if (!key.startsWith('sk-ant-')) { showToast('That doesn\'t look like a valid Anthropic key'); return; }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('help-new-apikey').value = '';
+  showToast('API key updated on this device ✓');
+  closeHelp();
+}
+
+// ══════════════════════════════════════════
+// Start the app — called last so all functions are defined
+autoConnect();
+</script>
+</body>
+</html>
