@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f7f7f5">
-<title>iOS & AI Learning Roadmap (3.05)</title>
+<title>iOS & AI Learning Roadmap (3.06)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -527,6 +527,43 @@
   .task-toggle-btn.remove { color: var(--red); border-color: #fca5a5; }
   .task-toggle-btn.restore { color: var(--green); border-color: #86efac; }
 
+  /* ── NO WORK DAY ── */
+  .day-block.no-work-day .day-header { background: #fafaf9; }
+  .no-work-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 500; padding: 2px 8px;
+    border-radius: 99px; background: #f1f5f9; color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  .no-work-content {
+    padding: 14px 16px; background: #fafaf9;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .no-work-reason {
+    flex: 1; padding: 8px 12px;
+    border: 1px solid var(--border2); border-radius: 8px;
+    background: #fff; font-family: var(--font); font-size: 13px;
+    color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+  .no-work-reason:focus { border-color: var(--accent); }
+  .no-work-reason::placeholder { color: var(--text3); }
+  .no-work-restore-btn {
+    flex-shrink: 0; padding: 7px 12px;
+    border: 1px solid #fca5a5; border-radius: 8px;
+    background: #fff; color: var(--red);
+    font-family: var(--font); font-size: 12px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .no-work-restore-btn:hover { background: #fee2e2; }
+  .no-work-pushed {
+    font-size: 11px; color: #64748b; padding: 10px 16px;
+    background: #fafaf9; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px;
+  }
+
   /* ── CHANGELOG ── */
   .changelog-entry { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
   .changelog-entry:last-child { border-bottom: none; margin-bottom: 0; }
@@ -1044,7 +1081,7 @@ let PHASES = []; // populated on load
 const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
 const SUPABASE_USER = 'roadmap';
-const APP_VERSION   = '3.05';
+const APP_VERSION   = '3.06';
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -1083,6 +1120,17 @@ const CHANGELOG = [
       'Added changelog system — every update saved to Supabase ios_ai_changelog table',
       'Change history viewable in Settings → View changelog',
       'Minor version auto-increments with each update',
+    ]
+  },
+  {
+    version: '3.06',
+    date: '2026-04-27',
+    changes: [
+      'Added No Work Day feature — mark any day as skipped with a reason field',
+      'Skipped days push all pending tasks forward to an Extended Schedule section',
+      'Restore skipped days at any time — tasks return to original slots',
+      'No-work days synced to Supabase and persist across all devices',
+      'Extended Schedule section shown at bottom when days are skipped',
     ]
   },
   {
@@ -1153,15 +1201,19 @@ function buildDynamicSchedule() {
   const pendingIdx = {};
   Object.keys(pendingByTag).forEach(tag => pendingIdx[tag] = 0);
 
-  // Build flat indexed schedule
+  // Build flat indexed schedule — skip pending task assignment on no-work days
   const schedule = [];
   PHASES.forEach((phase, phaseIdx) => {
     phase.weeks.forEach((week, weekIdx) => {
       week.days.forEach((day, dayIdx) => {
+        const dayKey   = `${phaseIdx}-${weekIdx}-${dayIdx}`;
+        const isNoWork = noWorkDays.has(dayKey);
+
         const dynamicTasks = day.tasks
           .filter(orig => !removedTasks.has(orig.id))
           .map(orig => {
             if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
+            if (isNoWork) return null; // don't assign pending tasks to no-work days
             const pending = pendingByTag[orig.tag] || [];
             if (pendingIdx[orig.tag] < pending.length) {
               const next = pending[pendingIdx[orig.tag]++];
@@ -1170,10 +1222,39 @@ function buildDynamicSchedule() {
             return null;
           }).filter(Boolean);
 
-        schedule.push({ phaseIdx, weekIdx, dayIdx, day, dynamicTasks });
+        schedule.push({ phaseIdx, weekIdx, dayIdx, day, dynamicTasks, isNoWork, dayKey });
       });
     });
   });
+
+  // For no-work days: any pending tasks they would have had are pushed to overflow days
+  // appended after the last scheduled day
+  const overflowByTag = {};
+  Object.keys(pendingByTag).forEach(tag => {
+    const remaining = pendingByTag[tag].slice(pendingIdx[tag]);
+    if (remaining.length > 0) overflowByTag[tag] = remaining;
+  });
+
+  // Attach overflow tasks to extra days appended after the last real day
+  if (Object.keys(overflowByTag).length > 0) {
+    const lastEntry = schedule[schedule.length - 1];
+    const overflowTasks = Object.values(overflowByTag).flat();
+    // Group overflow into chunks of original day size (4 tasks)
+    const chunkSize = 4;
+    for (let i = 0; i < overflowTasks.length; i += chunkSize) {
+      const chunk = overflowTasks.slice(i, i + chunkSize);
+      const extraDayNum = schedule.length - PHASES.flatMap(p => p.weeks.flatMap(w => w.days)).length + 1;
+      schedule.push({
+        phaseIdx: lastEntry.phaseIdx,
+        weekIdx: lastEntry.weekIdx,
+        dayIdx: lastEntry.dayIdx + extraDayNum,
+        day: { date: '+ Extra day', label: `Extra Day ${extraDayNum}`, tasks: [] },
+        dynamicTasks: chunk.map(t => ({ ...t, _status: 'pending', _movedUp: true, _overflow: true })),
+        isNoWork: false,
+        dayKey: `overflow-${extraDayNum}`
+      });
+    }
+  }
 
   // Merge custom subjects into schedule
   subjects.forEach(subject => {
@@ -1337,6 +1418,7 @@ async function autoConnect() {
 
   await loadSubjects();
   await loadRemovedTasks();
+  await loadNoWorkDays();
   await syncChangelog();
   renderAll();
 }
@@ -1345,12 +1427,53 @@ function saveLocal() {
   localStorage.setItem('checked_local',     JSON.stringify(checked));
   localStorage.setItem('notes_local',       JSON.stringify(notes));
   localStorage.setItem('completedAt_local', JSON.stringify(completedAt));
+  localStorage.setItem('noWorkDays_local',  JSON.stringify([...noWorkDays.entries()]));
 }
 
 function loadLocal() {
   checked     = JSON.parse(localStorage.getItem('checked_local')     || '{}');
   notes       = JSON.parse(localStorage.getItem('notes_local')       || '{}');
   completedAt = JSON.parse(localStorage.getItem('completedAt_local') || '{}');
+  const savedNoWork = localStorage.getItem('noWorkDays_local');
+  noWorkDays = savedNoWork ? new Map(JSON.parse(savedNoWork)) : new Map();
+}
+
+// ── NO WORK DAYS ──
+// noWorkDays: Map of dayKey -> { reason: string, date: string, label: string }
+// dayKey format: "phaseIdx-weekIdx-dayIdx"
+let noWorkDays = new Map();
+
+async function saveNoWorkDays() {
+  localStorage.setItem('noWorkDays_local', JSON.stringify([...noWorkDays.entries()]));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    await sbClient.from('ios_ai_progress').upsert({
+      user_id: userId,
+      task_id: '__no_work_days__',
+      done: false,
+      note: JSON.stringify([...noWorkDays.entries()]),
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,task_id' });
+  } catch(e) { console.warn('Could not save no-work days:', e.message); }
+}
+
+async function loadNoWorkDays() {
+  noWorkDays = new Map();
+  const local = localStorage.getItem('noWorkDays_local');
+  if (local) noWorkDays = new Map(JSON.parse(local));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    const { data } = await sbClient
+      .from('ios_ai_progress')
+      .select('note')
+      .eq('user_id', userId)
+      .eq('task_id', '__no_work_days__')
+      .single();
+    if (data?.note) {
+      noWorkDays = new Map(JSON.parse(data.note));
+      localStorage.setItem('noWorkDays_local', JSON.stringify([...noWorkDays.entries()]));
+    }
+  } catch(e) {}
 }
 
 // ══════════════════════════════════════════
@@ -1456,9 +1579,12 @@ function renderWeeks() {
   container.innerHTML = '';
   const schedule = buildDynamicSchedule();
 
+  // Count no-work days for summary
+  const noWorkCount = [...noWorkDays.keys()].filter(k => !k.startsWith('overflow')).length;
+
   PHASES.forEach((phase, pi) => {
     phase.weeks.forEach((week, wi) => {
-      const scheduledDays = schedule.filter(s => s.phaseIdx === pi && s.weekIdx === wi);
+      const scheduledDays = schedule.filter(s => s.phaseIdx === pi && s.weekIdx === wi && !s.dayKey.startsWith('overflow'));
       const weekTasks = scheduledDays.flatMap(s => s.dynamicTasks);
       const weekDone  = weekTasks.filter(t => checked[t.id]).length;
       const isOpen    = wi === 0;
@@ -1478,41 +1604,111 @@ function renderWeeks() {
             </div>
           </div>
           <div class="week-right">
-            <span class="week-count" style="color:${weekDone===weekTasks.length?'var(--green)':''}">${weekDone}/${weekTasks.length}</span>
+            <span class="week-count" style="color:${weekDone===weekTasks.length&&weekTasks.length>0?'var(--green)':''}">${weekDone}/${weekTasks.length}</span>
             <span class="week-chevron ${isOpen ? 'open' : ''}">▼</span>
           </div>
         </button>
         <div class="days-container ${isOpen ? 'open' : ''}" id="days-${pi}-${wi}">
-          ${scheduledDays.map((s, di) => renderDay(s.day, s.dynamicTasks, pi, wi, di)).join('')}
+          ${scheduledDays.map(s => renderDay(s.day, s.dynamicTasks, pi, wi, s.dayIdx)).join('')}
         </div>`;
       container.appendChild(block);
     });
   });
+
+  // Render overflow days (pushed from skipped days) at the end
+  const overflowDays = schedule.filter(s => s.dayKey.startsWith('overflow'));
+  if (overflowDays.length > 0) {
+    const block = document.createElement('div');
+    block.className = 'week-block';
+    block.innerHTML = `
+      <button class="week-header open" onclick="toggleWeek(this)" style="border-color:#fde68a">
+        <div class="week-left">
+          <div class="week-dot" style="background:#f59e0b"></div>
+          <div>
+            <div class="week-title">📅 Extended schedule</div>
+            <div class="week-dates">${noWorkCount} day${noWorkCount!==1?'s':''} skipped — tasks pushed forward</div>
+          </div>
+        </div>
+        <div class="week-right">
+          <span class="week-count">${overflowDays.flatMap(s=>s.dynamicTasks).filter(t=>checked[t.id]).length}/${overflowDays.flatMap(s=>s.dynamicTasks).length}</span>
+          <span class="week-chevron open">▼</span>
+        </div>
+      </button>
+      <div class="days-container open" style="border-color:#fde68a">
+        ${overflowDays.map((s,i) => renderDay(s.day, s.dynamicTasks, 99, 0, i)).join('')}
+      </div>`;
+    container.appendChild(block);
+  }
 }
 
 function renderDay(day, dynamicTasks, pi, wi, di) {
+  const dayKey   = `${pi}-${wi}-${di}`;
+  const isNoWork = noWorkDays.has(dayKey);
+  const noWorkInfo = isNoWork ? noWorkDays.get(dayKey) : null;
+
   const tasks   = activeFilter === 'All' ? dynamicTasks : dynamicTasks.filter(t => t.tag === activeFilter);
   const dayDone = dynamicTasks.filter(t => checked[t.id]).length;
-  const allDone = dynamicTasks.length > 0 && dayDone === dynamicTasks.length;
-  if (tasks.length === 0) return '';
+  const allDone = !isNoWork && dynamicTasks.length > 0 && dayDone === dynamicTasks.length;
+  const isOverflow = dayKey.startsWith('overflow');
+
+  if (!isNoWork && tasks.length === 0 && !isOverflow) return '';
+
+  const dayCheckIcon = isNoWork ? '🚫' : allDone ? '✓' : '';
+  const dayCheckCls  = isNoWork ? '' : allDone ? 'done' : '';
+  const headerCls    = isNoWork ? 'complete' : allDone ? 'complete' : '';
+  const headerBg     = isNoWork ? 'background:#f8fafc' : '';
+
+  const noWorkBadge  = isNoWork
+    ? `<span class="no-work-badge">🚫 No work day</span>`
+    : '';
+
+  const progressStr  = isNoWork ? '' : `${dayDone}/${dynamicTasks.length}`;
+  const progressColor = allDone ? 'var(--green)' : '';
+
+  const noWorkBtn = !isOverflow ? `
+    <button onclick="event.stopPropagation();toggleNoWorkDay('${dayKey}','${day.date}','${day.label}')"
+      style="background:none;border:1px solid ${isNoWork ? '#86efac' : '#e2e8f0'};border-radius:6px;
+             padding:3px 8px;font-size:10px;font-weight:500;cursor:pointer;color:${isNoWork ? 'var(--green)' : 'var(--text3)'};
+             white-space:nowrap;flex-shrink:0;font-family:var(--font)"
+      title="${isNoWork ? 'Restore this day' : 'Mark as no work day'}">
+      ${isNoWork ? '↩ Restore' : '🚫 Skip day'}
+    </button>` : '';
+
   return `
-    <div class="day-block">
-      <button class="day-header ${allDone?'complete':''}" onclick="toggleDay(this,'${pi}-${wi}-${di}')">
+    <div class="day-block ${isNoWork ? 'no-work-day' : ''}">
+      <button class="day-header ${headerCls}" style="${headerBg}" onclick="toggleDay(this,'${dayKey}')">
         <div class="day-left">
-          <div class="day-check ${allDone?'done':''}">${allDone?'✓':''}</div>
+          <div class="day-check ${dayCheckCls}">${dayCheckIcon}</div>
           <div>
-            <div class="day-label">${day.label}</div>
+            <div class="day-label">${day.label} ${noWorkBadge}</div>
             <div class="day-date">${day.date}</div>
           </div>
         </div>
         <div class="day-right">
-          <span class="day-progress" style="color:${allDone?'var(--green)':''}">${dayDone}/${dynamicTasks.length}</span>
-          <span style="color:var(--text3);font-size:11px" id="chev-${pi}-${wi}-${di}">▼</span>
+          <span class="day-progress" style="color:${progressColor}">${progressStr}</span>
+          ${noWorkBtn}
+          <span style="color:var(--text3);font-size:11px" id="chev-${dayKey}">▼</span>
         </div>
       </button>
-      <div class="tasks-wrap" id="tasks-${pi}-${wi}-${di}">
-        ${tasks.map(task => renderTask(task)).join('')}
-      </div>
+
+      ${isNoWork ? `
+        <div class="no-work-content" id="tasks-${dayKey}">
+          <span style="font-size:20px">🚫</span>
+          <input class="no-work-reason" type="text" maxlength="50"
+            placeholder="Reason (optional) — Holiday, sick day, rest day..."
+            value="${(noWorkInfo?.reason || '').replace(/"/g,'&quot;')}"
+            onchange="updateNoWorkReason('${dayKey}', this.value)"
+            onclick="event.stopPropagation()"/>
+          <div style="font-size:11px;color:var(--text3);white-space:nowrap">
+            ${dynamicTasks.length} task${dynamicTasks.length!==1?'s':''} pushed forward
+          </div>
+        </div>
+      ` : `
+        <div class="tasks-wrap" id="tasks-${dayKey}" ${isOverflow ? 'style="border-top:2px solid #fde68a"' : ''}>
+          ${isOverflow ? `<div style="font-size:11px;color:#92400e;background:#fef9c3;padding:6px 12px;margin-bottom:8px;border-radius:6px">📅 Tasks pushed forward from skipped days</div>` : ''}
+          ${tasks.map(task => renderTask(task)).join('')}
+        </div>
+      `}
     </div>`;
 }
 
@@ -1561,6 +1757,26 @@ function renderTask(task) {
 // ══════════════════════════════════════════
 // INTERACTIONS
 // ══════════════════════════════════════════
+async function toggleNoWorkDay(dayKey, date, label) {
+  if (noWorkDays.has(dayKey)) {
+    noWorkDays.delete(dayKey);
+    showToast('Day restored — schedule updated ✓');
+  } else {
+    noWorkDays.set(dayKey, { reason: '', date, label });
+    showToast('Day skipped — tasks pushed forward ✓');
+  }
+  await saveNoWorkDays();
+  renderAll();
+}
+
+async function updateNoWorkReason(dayKey, reason) {
+  if (noWorkDays.has(dayKey)) {
+    const existing = noWorkDays.get(dayKey);
+    noWorkDays.set(dayKey, { ...existing, reason });
+    await saveNoWorkDays();
+  }
+}
+
 function toggleTask(taskId) {
   checked[taskId] = !checked[taskId];
   syncTask(taskId, checked[taskId]);
@@ -1622,6 +1838,7 @@ function toggleWeek(btn) {
 function toggleDay(btn, key) {
   const wrap = document.getElementById('tasks-' + key);
   const chev = document.getElementById('chev-' + key);
+  if (!wrap) return;
   const isVisible = wrap.style.display !== 'none';
   wrap.style.display = isVisible ? 'none' : 'block';
   if (chev) chev.style.transform = isVisible ? 'rotate(-90deg)' : '';
@@ -1645,7 +1862,7 @@ function reconnect() { closeSettings(); autoConnect(); showToast('Reconnecting..
 
 async function resetProgress() {
   if (!confirm('Reset all progress and notes? This cannot be undone.')) return;
-  checked = {}; notes = {}; completedAt = {};
+  checked = {}; notes = {}; completedAt = {}; noWorkDays = new Map();
   saveLocal();
   if (syncMode === 'live' && sbClient)
     await sbClient.from('ios_ai_progress').delete().eq('user_id', userId);
