@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f7f7f5">
-<title>Learning Roadmap Template (1.00)</title>
+<title>My Learning Roadmap (1.00)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -527,6 +527,43 @@
   .task-toggle-btn.remove { color: var(--red); border-color: #fca5a5; }
   .task-toggle-btn.restore { color: var(--green); border-color: #86efac; }
 
+  /* ── NO WORK DAY ── */
+  .day-block.no-work-day .day-header { background: #fafaf9; }
+  .no-work-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 500; padding: 2px 8px;
+    border-radius: 99px; background: #f1f5f9; color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+  .no-work-content {
+    padding: 14px 16px; background: #fafaf9;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .no-work-reason {
+    flex: 1; padding: 8px 12px;
+    border: 1px solid var(--border2); border-radius: 8px;
+    background: #fff; font-family: var(--font); font-size: 13px;
+    color: var(--text); outline: none;
+    transition: border-color 0.15s;
+  }
+  .no-work-reason:focus { border-color: var(--accent); }
+  .no-work-reason::placeholder { color: var(--text3); }
+  .no-work-restore-btn {
+    flex-shrink: 0; padding: 7px 12px;
+    border: 1px solid #fca5a5; border-radius: 8px;
+    background: #fff; color: var(--red);
+    font-family: var(--font); font-size: 12px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .no-work-restore-btn:hover { background: #fee2e2; }
+  .no-work-pushed {
+    font-size: 11px; color: #64748b; padding: 10px 16px;
+    background: #fafaf9; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 6px;
+  }
+
   /* ── CHANGELOG ── */
   .changelog-entry { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
   .changelog-entry:last-child { border-bottom: none; margin-bottom: 0; }
@@ -704,13 +741,50 @@
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- SETUP WIZARD — shown on first run -->
+<div id="setup-wizard-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)">
+  <div style="background:#fff;border-radius:20px;padding:32px 28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.15)">
+    <div style="font-size:22px;font-weight:700;color:#1a1a1a;margin-bottom:6px" id="wizard-roadmap-name">My Learning Roadmap</div>
+    <div style="font-size:12px;color:#9b9b9b;letter-spacing:.05em;text-transform:uppercase;margin-bottom:28px">Schedule setup</div>
 
-<!-- SETUP BANNER — remove once configured -->
-<div id="setup-banner" style="background:#fef9c3;border-bottom:1px solid #fde68a;padding:12px 20px;font-size:13px;color:#92400e;text-align:center;display:flex;align-items:center;justify-content:center;gap:12px">
-  <span>⚙ This is a blank template. <strong>Ask Claude to fill in your schedule</strong>, then update the Supabase credentials and SUPABASE_USER in the JS.</span>
-  <button onclick="document.getElementById('setup-banner').style.display='none'" style="background:none;border:1px solid #d97706;border-radius:6px;padding:3px 10px;color:#92400e;cursor:pointer;font-size:12px">Dismiss</button>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:7px">Start date</label>
+        <input type="date" id="wizard-start-date" style="width:100%;padding:10px 12px;border:1px solid #d4d4d0;border-radius:8px;font-size:14px;font-family:inherit;outline:none;color:#1a1a1a">
+      </div>
+
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:7px">Days per week</label>
+        <div style="display:flex;gap:8px">
+          <button class="wizard-day-btn" data-days="5" onclick="selectWizardDays(this)" style="flex:1;padding:9px;border-radius:8px;border:1px solid #d4d4d0;background:#f9f9f8;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b6b6b">5 days</button>
+          <button class="wizard-day-btn active" data-days="5" onclick="selectWizardDays(this)" style="flex:1;padding:9px;border-radius:8px;border:1px solid #6366f1;background:#ede9fe;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#4338ca">Mon–Fri</button>
+          <button class="wizard-day-btn" data-days="6" onclick="selectWizardDays(this)" style="flex:1;padding:9px;border-radius:8px;border:1px solid #d4d4d0;background:#f9f9f8;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b6b6b">6 days</button>
+          <button class="wizard-day-btn" data-days="7" onclick="selectWizardDays(this)" style="flex:1;padding:9px;border-radius:8px;border:1px solid #d4d4d0;background:#f9f9f8;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b6b6b">7 days</button>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:11px;font-weight:600;color:#6b6b6b;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:7px">Duration</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="wizard-dur-btn" data-weeks="4" onclick="selectWizardDuration(this)" style="flex:1;min-width:80px;padding:9px;border-radius:8px;border:1px solid #d4d4d0;background:#f9f9f8;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b6b6b">4 weeks</button>
+          <button class="wizard-dur-btn active" data-weeks="8" onclick="selectWizardDuration(this)" style="flex:1;min-width:80px;padding:9px;border-radius:8px;border:1px solid #6366f1;background:#ede9fe;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#4338ca">8 weeks</button>
+          <button class="wizard-dur-btn" data-weeks="12" onclick="selectWizardDuration(this)" style="flex:1;min-width:80px;padding:9px;border-radius:8px;border:1px solid #d4d4d0;background:#f9f9f8;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b6b6b">12 weeks</button>
+          <button class="wizard-dur-btn" data-weeks="24" onclick="selectWizardDuration(this)" style="flex:1;min-width:80px;padding:9px;border-radius:8px;border:1px solid #d4d4d0;background:#f9f9f8;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;color:#6b6b6b">24 weeks</button>
+        </div>
+      </div>
+
+      <div id="wizard-error" style="display:none;font-size:12px;color:#dc2626;padding:8px 12px;background:#fee2e2;border:1px solid #fca5a5;border-radius:7px"></div>
+
+      <button onclick="confirmWizard()" style="width:100%;padding:13px;background:#6366f1;color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px">
+        Start my schedule →
+      </button>
+
+      <p style="font-size:11px;color:#9b9b9b;text-align:center;margin:0">These settings are saved locally and can be changed in Settings</p>
+    </div>
+  </div>
 </div>
+
+<!-- HEADER -->
 <header>
   <div class="header-inner">
     <div class="logo" id="app-logo">My Learning Roadmap</div>
@@ -727,7 +801,7 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-title" id="app-hero-title"><span>My</span> Learning Roadmap</div>
-  <div class="hero-sub">Your schedule · 5 days/week</div>
+  <div class="hero-sub" id="app-hero-sub">Your schedule · 5 days/week</div>
 
   <div class="progress-section">
     <div class="progress-ring-wrap">
@@ -773,7 +847,11 @@
 <div class="filters">
   <div class="filter-scroll">
     <button class="filter-chip active" onclick="setFilter('All',this)">All</button>
-    <button class="filter-chip" onclick="setFilter('Topic',this)">📚 Topic</button>
+    <button class="filter-chip" onclick="setFilter('Typing',this)">⌨ Typing</button>
+    <button class="filter-chip" onclick="setFilter('Swift',this)">🍎 Swift</button>
+    <button class="filter-chip" onclick="setFilter('AI',this)">🧠 AI</button>
+    <button class="filter-chip" onclick="setFilter('PyTorch',this)">🔥 PyTorch</button>
+    <button class="filter-chip" onclick="setFilter('Python',this)">🐍 Python</button>
     <button class="filter-chip" onclick="setFilter('Review',this)">📝 Review</button>
   </div>
 </div>
@@ -973,6 +1051,14 @@
 
     <div class="panel-row">
       <div>
+        <div class="panel-row-label">Schedule settings</div>
+        <div class="panel-row-sub" id="settings-schedule-info">Start date · duration · days/week</div>
+      </div>
+      <button class="panel-btn" onclick="resetWizard()">Change</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
         <div class="panel-row-label">Reset all progress</div>
         <div class="panel-row-sub">Cannot be undone</div>
       </div>
@@ -1035,34 +1121,19 @@
 
 <script>
 // ══════════════════════════════════════════
-// DATA
+// DATA — loaded dynamically from Supabase ios_ai_tasks table
+// PHASES is built at runtime by loadTasksFromSupabase()
 // ══════════════════════════════════════════
-const PHASES = [{
-  // ════════════════════════════════════════════════════
-  // TEMPLATE — Replace this with your schedule data
-  // Ask Claude: "Build me a roadmap for [your topic]
-  //              using this template file"
-  // Claude will fill in weeks, days and tasks for you.
-  // ════════════════════════════════════════════════════
-  id: 1, title: "Phase 1 — Your Schedule", color: "#6366f1",
-  weeks: [
-    { week: 1, days: [
-      { date: "Mon 1 Jun 2026", label: "Day 1", tasks: [
-        { id:"t-1-1", time:"Morning", text:"Your first task — ask Claude to generate this", resource:"Your resource", url:"https://example.com", tag:"Topic" },
-        { id:"t-1-2", time:"Afternoon", text:"Your second task", resource:"Your resource", url:"https://example.com", tag:"Topic" },
-      ]},
-    ]},
-  ]
-}];
+let PHASES = []; // populated on load
 
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
 const SUPABASE_URL  = 'YOUR_SUPABASE_URL'; // ← paste your Supabase project URL
 const SUPABASE_KEY  = 'YOUR_SUPABASE_ANON_KEY'; // ← paste your Supabase anon key
-const SUPABASE_USER = 'my-roadmap'; // ← change this per roadmap (e.g. 'spanish', 'fitness')
+const SUPABASE_USER = 'my-roadmap'; // ← unique name per roadmap e.g. 'spanish', 'fitness'
 const APP_VERSION   = '1.00';
-const ROADMAP_NAME  = 'My Learning Roadmap'; // ← change this to your schedule name
+const ROADMAP_NAME  = 'My Learning Roadmap'; // ← change to your schedule name
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -1072,8 +1143,8 @@ const CHANGELOG = [
     date: new Date().toISOString().slice(0,10),
     changes: [
       'Initial setup from roadmap_template.html',
-      'Replace PHASES data with your schedule',
-      'Update SUPABASE_USER to a unique name for this roadmap',
+      'Update SUPABASE_URL, SUPABASE_KEY, SUPABASE_USER and ROADMAP_NAME',
+      'Run seed SQL to populate ios_ai_tasks with your schedule',
     ]
   },
 ];
@@ -1087,11 +1158,18 @@ let activeFilter = 'All';
 let syncMode = 'offline';
 let subjects = [];
 let removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
+let tasksLoaded = false;
 
-const allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
-const totalCount = allTasks.length;
+// allTasks, totalCount, taskById computed after PHASES loads from Supabase
+let allTasks = [];
+let totalCount = 0;
 const taskById = {};
-allTasks.forEach(t => taskById[t.id] = t);
+
+function recomputeTaskIndex() {
+  allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
+  totalCount = allTasks.length;
+  allTasks.forEach(t => taskById[t.id] = t);
+}
 
 // ══════════════════════════════════════════
 // DYNAMIC SCHEDULE ENGINE
@@ -1115,15 +1193,19 @@ function buildDynamicSchedule() {
   const pendingIdx = {};
   Object.keys(pendingByTag).forEach(tag => pendingIdx[tag] = 0);
 
-  // Build flat indexed schedule
+  // Build flat indexed schedule — skip pending task assignment on no-work days
   const schedule = [];
   PHASES.forEach((phase, phaseIdx) => {
     phase.weeks.forEach((week, weekIdx) => {
       week.days.forEach((day, dayIdx) => {
+        const dayKey   = `${phaseIdx}-${weekIdx}-${dayIdx}`;
+        const isNoWork = noWorkDays.has(dayKey);
+
         const dynamicTasks = day.tasks
           .filter(orig => !removedTasks.has(orig.id))
           .map(orig => {
             if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
+            if (isNoWork) return null; // don't assign pending tasks to no-work days
             const pending = pendingByTag[orig.tag] || [];
             if (pendingIdx[orig.tag] < pending.length) {
               const next = pending[pendingIdx[orig.tag]++];
@@ -1132,10 +1214,39 @@ function buildDynamicSchedule() {
             return null;
           }).filter(Boolean);
 
-        schedule.push({ phaseIdx, weekIdx, dayIdx, day, dynamicTasks });
+        schedule.push({ phaseIdx, weekIdx, dayIdx, day, dynamicTasks, isNoWork, dayKey });
       });
     });
   });
+
+  // For no-work days: any pending tasks they would have had are pushed to overflow days
+  // appended after the last scheduled day
+  const overflowByTag = {};
+  Object.keys(pendingByTag).forEach(tag => {
+    const remaining = pendingByTag[tag].slice(pendingIdx[tag]);
+    if (remaining.length > 0) overflowByTag[tag] = remaining;
+  });
+
+  // Attach overflow tasks to extra days appended after the last real day
+  if (Object.keys(overflowByTag).length > 0) {
+    const lastEntry = schedule[schedule.length - 1];
+    const overflowTasks = Object.values(overflowByTag).flat();
+    // Group overflow into chunks of original day size (4 tasks)
+    const chunkSize = 4;
+    for (let i = 0; i < overflowTasks.length; i += chunkSize) {
+      const chunk = overflowTasks.slice(i, i + chunkSize);
+      const extraDayNum = schedule.length - PHASES.flatMap(p => p.weeks.flatMap(w => w.days)).length + 1;
+      schedule.push({
+        phaseIdx: lastEntry.phaseIdx,
+        weekIdx: lastEntry.weekIdx,
+        dayIdx: lastEntry.dayIdx + extraDayNum,
+        day: { date: '+ Extra day', label: `Extra Day ${extraDayNum}`, tasks: [] },
+        dynamicTasks: chunk.map(t => ({ ...t, _status: 'pending', _movedUp: true, _overflow: true })),
+        isNoWork: false,
+        dayKey: `overflow-${extraDayNum}`
+      });
+    }
+  }
 
   // Merge custom subjects into schedule
   subjects.forEach(subject => {
@@ -1161,6 +1272,180 @@ function buildDynamicSchedule() {
   injectSubjectStyles();
 
   return schedule;
+}
+
+// ══════════════════════════════════════════
+// LOAD TASKS FROM SUPABASE
+// ══════════════════════════════════════════
+async function loadTasksFromSupabase() {
+  // Show loading state
+  const container = document.getElementById('main-content');
+  container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:14px">Loading schedule from Supabase...</div>';
+
+  try {
+    const { data, error } = await sbClient
+      .from('ios_ai_tasks')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--red);font-size:14px">⚠ No tasks found in Supabase.<br><br>Run the seed SQL file in your Supabase SQL editor.</div>';
+      return false;
+    }
+
+    // Assemble PHASES structure from flat rows
+    const phaseMap = {};
+    data.forEach(row => {
+      const pid = row.phase_id;
+      if (!phaseMap[pid]) {
+        phaseMap[pid] = { id: pid, title: row.phase_title, color: row.phase_color, weeks: {} };
+      }
+      const wk = row.week_num;
+      if (!phaseMap[pid].weeks[wk]) {
+        phaseMap[pid].weeks[wk] = { week: wk, date_from: row.week_date_from, date_to: row.week_date_to, days: {} };
+      }
+      const dk = row.day_date;
+      if (!phaseMap[pid].weeks[wk].days[dk]) {
+        phaseMap[pid].weeks[wk].days[dk] = { date: row.day_date, label: row.day_label, tasks: [] };
+      }
+      phaseMap[pid].weeks[wk].days[dk].tasks.push({
+        id: row.id, time: row.time_slot, text: row.task_text,
+        resource: row.resource, url: row.url, tag: row.tag
+      });
+    });
+
+    // Convert maps to sorted arrays
+    PHASES = Object.values(phaseMap).sort((a,b) => a.id - b.id).map(phase => ({
+      ...phase,
+      weeks: Object.values(phase.weeks).sort((a,b) => a.week - b.week).map(week => ({
+        ...week,
+        days: Object.values(week.days)
+      }))
+    }));
+
+    recomputeTaskIndex();
+    tasksLoaded = true;
+
+    // Rebuild filter chips from actual tags in data
+    const tags = [...new Set(data.map(r => r.tag))];
+    rebuildFilterChipsFromTags(tags);
+
+    return true;
+  } catch(e) {
+    container.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--red);font-size:14px">⚠ Failed to load tasks: ${e.message}</div>`;
+    return false;
+  }
+}
+
+function rebuildFilterChipsFromTags(baseTags) {
+  const scroll = document.querySelector('.filter-scroll');
+  const subjectTags = subjects.map(s => ({ tag: s.tag, name: s.name, color: s.color }));
+  const tagEmojis = { Typing:'⌨', Swift:'🍎', AI:'🧠', PyTorch:'🔥', Python:'🐍', Review:'📝' };
+
+  scroll.innerHTML = `<button class="filter-chip active" onclick="setFilter('All',this)">All</button>` +
+    baseTags.map(t =>
+      `<button class="filter-chip ${activeFilter===t?'active':''}" onclick="setFilter('${t}',this)">${tagEmojis[t]||'📚'} ${t}</button>`
+    ).join('') +
+    subjectTags.map(s =>
+      `<button class="filter-chip ${activeFilter===s.tag?'active':''}" onclick="setFilter('${s.tag}',this)"
+        style="${activeFilter===s.tag?`background:${s.color}22;border-color:${s.color};color:${s.color}`:''}">
+        ${s.name}
+      </button>`
+    ).join('');
+}
+
+
+// ══════════════════════════════════════════
+// SETUP WIZARD
+// ══════════════════════════════════════════
+const SCHEDULE_CONFIG_KEY = 'schedule_config_' + SUPABASE_USER;
+let scheduleConfig = null;
+let wizardDays = 5;
+let wizardWeeks = 8;
+
+function loadScheduleConfig() {
+  const saved = localStorage.getItem(SCHEDULE_CONFIG_KEY);
+  if (saved) { scheduleConfig = JSON.parse(saved); return true; }
+  return false;
+}
+
+function saveScheduleConfig(config) {
+  scheduleConfig = config;
+  localStorage.setItem(SCHEDULE_CONFIG_KEY, JSON.stringify(config));
+}
+
+function selectWizardDays(btn) {
+  document.querySelectorAll('.wizard-day-btn').forEach(b => {
+    b.style.border = '1px solid #d4d4d0';
+    b.style.background = '#f9f9f8';
+    b.style.color = '#6b6b6b';
+  });
+  btn.style.border = '1px solid #6366f1';
+  btn.style.background = '#ede9fe';
+  btn.style.color = '#4338ca';
+  wizardDays = parseInt(btn.dataset.days);
+}
+
+function selectWizardDuration(btn) {
+  document.querySelectorAll('.wizard-dur-btn').forEach(b => {
+    b.style.border = '1px solid #d4d4d0';
+    b.style.background = '#f9f9f8';
+    b.style.color = '#6b6b6b';
+  });
+  btn.style.border = '1px solid #6366f1';
+  btn.style.background = '#ede9fe';
+  btn.style.color = '#4338ca';
+  wizardWeeks = parseInt(btn.dataset.weeks);
+}
+
+function confirmWizard() {
+  const dateInput = document.getElementById('wizard-start-date').value;
+  const errEl = document.getElementById('wizard-error');
+  if (!dateInput) {
+    errEl.textContent = 'Please choose a start date.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const startDate = new Date(dateInput);
+  const endDate   = new Date(startDate);
+  endDate.setDate(endDate.getDate() + (wizardWeeks * 7));
+  const fmt = d => d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+  saveScheduleConfig({
+    startDate: dateInput,
+    endDate: endDate.toISOString().slice(0,10),
+    daysPerWeek: wizardDays,
+    totalWeeks: wizardWeeks,
+    startLabel: fmt(startDate),
+    endLabel: fmt(endDate),
+  });
+
+  document.getElementById('setup-wizard-overlay').style.display = 'none';
+  applyScheduleConfig();
+}
+
+function applyScheduleConfig() {
+  if (!scheduleConfig) return;
+  const sub = document.getElementById('app-hero-sub');
+  if (sub) sub.textContent = scheduleConfig.startLabel + ' – ' + scheduleConfig.endLabel
+    + ' · ' + scheduleConfig.daysPerWeek + ' days/week';
+}
+
+// ── ROADMAP NAME ──
+function applyRoadmapName() {
+  const name = ROADMAP_NAME;
+  document.title = name + ' (' + APP_VERSION + ')';
+  const logo = document.getElementById('app-logo');
+  if (logo) logo.textContent = name;
+  const hero = document.getElementById('app-hero-title');
+  if (hero) hero.innerHTML = '<span>' + name.split(' ')[0] + '</span> ' + name.split(' ').slice(1).join(' ');
+  const aboutName = document.getElementById('about-roadmap-name');
+  if (aboutName) aboutName.textContent = name;
+  const wizName = document.getElementById('wizard-roadmap-name');
+  if (wizName) wizName.textContent = name;
 }
 
 // ══════════════════════════════════════════
@@ -1212,10 +1497,22 @@ async function autoConnect() {
   document.getElementById('settings-sync').textContent =
     syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
   document.getElementById('settings-version').textContent = 'Current version: v' + APP_VERSION;
+
+  applyRoadmapName();
+  if (loadScheduleConfig()) {
+    document.getElementById('setup-wizard-overlay').style.display = 'none';
+    applyScheduleConfig();
+  } else {
+    document.getElementById('wizard-start-date').value = new Date().toISOString().slice(0,10);
+  }
+  // Load tasks from Supabase first — everything depends on this
+  const loaded = await loadTasksFromSupabase();
+  if (!loaded) return; // error shown in container
+
   await loadSubjects();
   await loadRemovedTasks();
+  await loadNoWorkDays();
   await syncChangelog();
-  rebuildFilterChips();
   renderAll();
 }
 
@@ -1223,12 +1520,53 @@ function saveLocal() {
   localStorage.setItem('checked_local',     JSON.stringify(checked));
   localStorage.setItem('notes_local',       JSON.stringify(notes));
   localStorage.setItem('completedAt_local', JSON.stringify(completedAt));
+  localStorage.setItem('noWorkDays_local',  JSON.stringify([...noWorkDays.entries()]));
 }
 
 function loadLocal() {
   checked     = JSON.parse(localStorage.getItem('checked_local')     || '{}');
   notes       = JSON.parse(localStorage.getItem('notes_local')       || '{}');
   completedAt = JSON.parse(localStorage.getItem('completedAt_local') || '{}');
+  const savedNoWork = localStorage.getItem('noWorkDays_local');
+  noWorkDays = savedNoWork ? new Map(JSON.parse(savedNoWork)) : new Map();
+}
+
+// ── NO WORK DAYS ──
+// noWorkDays: Map of dayKey -> { reason: string, date: string, label: string }
+// dayKey format: "phaseIdx-weekIdx-dayIdx"
+let noWorkDays = new Map();
+
+async function saveNoWorkDays() {
+  localStorage.setItem('noWorkDays_local', JSON.stringify([...noWorkDays.entries()]));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    await sbClient.from('ios_ai_progress').upsert({
+      user_id: userId,
+      task_id: '__no_work_days__',
+      done: false,
+      note: JSON.stringify([...noWorkDays.entries()]),
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id,task_id' });
+  } catch(e) { console.warn('Could not save no-work days:', e.message); }
+}
+
+async function loadNoWorkDays() {
+  noWorkDays = new Map();
+  const local = localStorage.getItem('noWorkDays_local');
+  if (local) noWorkDays = new Map(JSON.parse(local));
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    const { data } = await sbClient
+      .from('ios_ai_progress')
+      .select('note')
+      .eq('user_id', userId)
+      .eq('task_id', '__no_work_days__')
+      .single();
+    if (data?.note) {
+      noWorkDays = new Map(JSON.parse(data.note));
+      localStorage.setItem('noWorkDays_local', JSON.stringify([...noWorkDays.entries()]));
+    }
+  } catch(e) {}
 }
 
 // ══════════════════════════════════════════
@@ -1334,9 +1672,12 @@ function renderWeeks() {
   container.innerHTML = '';
   const schedule = buildDynamicSchedule();
 
+  // Count no-work days for summary
+  const noWorkCount = [...noWorkDays.keys()].filter(k => !k.startsWith('overflow')).length;
+
   PHASES.forEach((phase, pi) => {
     phase.weeks.forEach((week, wi) => {
-      const scheduledDays = schedule.filter(s => s.phaseIdx === pi && s.weekIdx === wi);
+      const scheduledDays = schedule.filter(s => s.phaseIdx === pi && s.weekIdx === wi && !s.dayKey.startsWith('overflow'));
       const weekTasks = scheduledDays.flatMap(s => s.dynamicTasks);
       const weekDone  = weekTasks.filter(t => checked[t.id]).length;
       const isOpen    = wi === 0;
@@ -1356,41 +1697,111 @@ function renderWeeks() {
             </div>
           </div>
           <div class="week-right">
-            <span class="week-count" style="color:${weekDone===weekTasks.length?'var(--green)':''}">${weekDone}/${weekTasks.length}</span>
+            <span class="week-count" style="color:${weekDone===weekTasks.length&&weekTasks.length>0?'var(--green)':''}">${weekDone}/${weekTasks.length}</span>
             <span class="week-chevron ${isOpen ? 'open' : ''}">▼</span>
           </div>
         </button>
         <div class="days-container ${isOpen ? 'open' : ''}" id="days-${pi}-${wi}">
-          ${scheduledDays.map((s, di) => renderDay(s.day, s.dynamicTasks, pi, wi, di)).join('')}
+          ${scheduledDays.map(s => renderDay(s.day, s.dynamicTasks, pi, wi, s.dayIdx)).join('')}
         </div>`;
       container.appendChild(block);
     });
   });
+
+  // Render overflow days (pushed from skipped days) at the end
+  const overflowDays = schedule.filter(s => s.dayKey.startsWith('overflow'));
+  if (overflowDays.length > 0) {
+    const block = document.createElement('div');
+    block.className = 'week-block';
+    block.innerHTML = `
+      <button class="week-header open" onclick="toggleWeek(this)" style="border-color:#fde68a">
+        <div class="week-left">
+          <div class="week-dot" style="background:#f59e0b"></div>
+          <div>
+            <div class="week-title">📅 Extended schedule</div>
+            <div class="week-dates">${noWorkCount} day${noWorkCount!==1?'s':''} skipped — tasks pushed forward</div>
+          </div>
+        </div>
+        <div class="week-right">
+          <span class="week-count">${overflowDays.flatMap(s=>s.dynamicTasks).filter(t=>checked[t.id]).length}/${overflowDays.flatMap(s=>s.dynamicTasks).length}</span>
+          <span class="week-chevron open">▼</span>
+        </div>
+      </button>
+      <div class="days-container open" style="border-color:#fde68a">
+        ${overflowDays.map((s,i) => renderDay(s.day, s.dynamicTasks, 99, 0, i)).join('')}
+      </div>`;
+    container.appendChild(block);
+  }
 }
 
 function renderDay(day, dynamicTasks, pi, wi, di) {
+  const dayKey   = `${pi}-${wi}-${di}`;
+  const isNoWork = noWorkDays.has(dayKey);
+  const noWorkInfo = isNoWork ? noWorkDays.get(dayKey) : null;
+
   const tasks   = activeFilter === 'All' ? dynamicTasks : dynamicTasks.filter(t => t.tag === activeFilter);
   const dayDone = dynamicTasks.filter(t => checked[t.id]).length;
-  const allDone = dynamicTasks.length > 0 && dayDone === dynamicTasks.length;
-  if (tasks.length === 0) return '';
+  const allDone = !isNoWork && dynamicTasks.length > 0 && dayDone === dynamicTasks.length;
+  const isOverflow = dayKey.startsWith('overflow');
+
+  if (!isNoWork && tasks.length === 0 && !isOverflow) return '';
+
+  const dayCheckIcon = isNoWork ? '🚫' : allDone ? '✓' : '';
+  const dayCheckCls  = isNoWork ? '' : allDone ? 'done' : '';
+  const headerCls    = isNoWork ? 'complete' : allDone ? 'complete' : '';
+  const headerBg     = isNoWork ? 'background:#f8fafc' : '';
+
+  const noWorkBadge  = isNoWork
+    ? `<span class="no-work-badge">🚫 No work day</span>`
+    : '';
+
+  const progressStr  = isNoWork ? '' : `${dayDone}/${dynamicTasks.length}`;
+  const progressColor = allDone ? 'var(--green)' : '';
+
+  const noWorkBtn = !isOverflow ? `
+    <button onclick="event.stopPropagation();toggleNoWorkDay('${dayKey}','${day.date}','${day.label}')"
+      style="background:none;border:1px solid ${isNoWork ? '#86efac' : '#e2e8f0'};border-radius:6px;
+             padding:3px 8px;font-size:10px;font-weight:500;cursor:pointer;color:${isNoWork ? 'var(--green)' : 'var(--text3)'};
+             white-space:nowrap;flex-shrink:0;font-family:var(--font)"
+      title="${isNoWork ? 'Restore this day' : 'Mark as no work day'}">
+      ${isNoWork ? '↩ Restore' : '🚫 Skip day'}
+    </button>` : '';
+
   return `
-    <div class="day-block">
-      <button class="day-header ${allDone?'complete':''}" onclick="toggleDay(this,'${pi}-${wi}-${di}')">
+    <div class="day-block ${isNoWork ? 'no-work-day' : ''}">
+      <button class="day-header ${headerCls}" style="${headerBg}" onclick="toggleDay(this,'${dayKey}')">
         <div class="day-left">
-          <div class="day-check ${allDone?'done':''}">${allDone?'✓':''}</div>
+          <div class="day-check ${dayCheckCls}">${dayCheckIcon}</div>
           <div>
-            <div class="day-label">${day.label}</div>
+            <div class="day-label">${day.label} ${noWorkBadge}</div>
             <div class="day-date">${day.date}</div>
           </div>
         </div>
         <div class="day-right">
-          <span class="day-progress" style="color:${allDone?'var(--green)':''}">${dayDone}/${dynamicTasks.length}</span>
-          <span style="color:var(--text3);font-size:11px" id="chev-${pi}-${wi}-${di}">▼</span>
+          <span class="day-progress" style="color:${progressColor}">${progressStr}</span>
+          ${noWorkBtn}
+          <span style="color:var(--text3);font-size:11px" id="chev-${dayKey}">▼</span>
         </div>
       </button>
-      <div class="tasks-wrap" id="tasks-${pi}-${wi}-${di}">
-        ${tasks.map(task => renderTask(task)).join('')}
-      </div>
+
+      ${isNoWork ? `
+        <div class="no-work-content" id="tasks-${dayKey}">
+          <span style="font-size:20px">🚫</span>
+          <input class="no-work-reason" type="text" maxlength="50"
+            placeholder="Reason (optional) — Holiday, sick day, rest day..."
+            value="${(noWorkInfo?.reason || '').replace(/"/g,'&quot;')}"
+            onchange="updateNoWorkReason('${dayKey}', this.value)"
+            onclick="event.stopPropagation()"/>
+          <div style="font-size:11px;color:var(--text3);white-space:nowrap">
+            ${dynamicTasks.length} task${dynamicTasks.length!==1?'s':''} pushed forward
+          </div>
+        </div>
+      ` : `
+        <div class="tasks-wrap" id="tasks-${dayKey}" ${isOverflow ? 'style="border-top:2px solid #fde68a"' : ''}>
+          ${isOverflow ? `<div style="font-size:11px;color:#92400e;background:#fef9c3;padding:6px 12px;margin-bottom:8px;border-radius:6px">📅 Tasks pushed forward from skipped days</div>` : ''}
+          ${tasks.map(task => renderTask(task)).join('')}
+        </div>
+      `}
     </div>`;
 }
 
@@ -1439,6 +1850,26 @@ function renderTask(task) {
 // ══════════════════════════════════════════
 // INTERACTIONS
 // ══════════════════════════════════════════
+async function toggleNoWorkDay(dayKey, date, label) {
+  if (noWorkDays.has(dayKey)) {
+    noWorkDays.delete(dayKey);
+    showToast('Day restored — schedule updated ✓');
+  } else {
+    noWorkDays.set(dayKey, { reason: '', date, label });
+    showToast('Day skipped — tasks pushed forward ✓');
+  }
+  await saveNoWorkDays();
+  renderAll();
+}
+
+async function updateNoWorkReason(dayKey, reason) {
+  if (noWorkDays.has(dayKey)) {
+    const existing = noWorkDays.get(dayKey);
+    noWorkDays.set(dayKey, { ...existing, reason });
+    await saveNoWorkDays();
+  }
+}
+
 function toggleTask(taskId) {
   checked[taskId] = !checked[taskId];
   syncTask(taskId, checked[taskId]);
@@ -1500,6 +1931,7 @@ function toggleWeek(btn) {
 function toggleDay(btn, key) {
   const wrap = document.getElementById('tasks-' + key);
   const chev = document.getElementById('chev-' + key);
+  if (!wrap) return;
   const isVisible = wrap.style.display !== 'none';
   wrap.style.display = isVisible ? 'none' : 'block';
   if (chev) chev.style.transform = isVisible ? 'rotate(-90deg)' : '';
@@ -1521,9 +1953,17 @@ function closeSettings(e) {
 
 function reconnect() { closeSettings(); autoConnect(); showToast('Reconnecting...'); }
 
+function resetWizard() {
+  closeSettings();
+  localStorage.removeItem(SCHEDULE_CONFIG_KEY);
+  scheduleConfig = null;
+  document.getElementById('wizard-start-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('setup-wizard-overlay').style.display = 'flex';
+}
+
 async function resetProgress() {
   if (!confirm('Reset all progress and notes? This cannot be undone.')) return;
-  checked = {}; notes = {}; completedAt = {};
+  checked = {}; notes = {}; completedAt = {}; noWorkDays = new Map();
   saveLocal();
   if (syncMode === 'live' && sbClient)
     await sbClient.from('ios_ai_progress').delete().eq('user_id', userId);
@@ -2065,17 +2505,11 @@ async function loadChangelog() {
 
 // ── FILTER CHIPS ──
 function rebuildFilterChips() {
-  const scroll = document.querySelector('.filter-scroll');
-  const baseTags = ['All', 'Typing', 'Swift', 'AI', 'PyTorch', 'Python', 'Review'];
-  const subjectTags = subjects.map(s => ({ tag: s.tag, name: s.name, color: s.color }));
-
-  scroll.innerHTML = baseTags.map(f =>
-    `<button class="filter-chip ${activeFilter===f?'active':''}" onclick="setFilter('${f}',this)">${f}</button>`
-  ).join('') + subjectTags.map(s =>
-    `<button class="filter-chip ${activeFilter===s.tag?'active':''}" onclick="setFilter('${s.tag}',this)" style="${activeFilter===s.tag?`background:${s.color}22;border-color:${s.color};color:${s.color}`:''}">
-      ${s.name}
-    </button>`
-  ).join('');
+  // Re-derive base tags from loaded tasks, then rebuild
+  if (allTasks.length > 0) {
+    const tags = [...new Set(allTasks.map(t => t.tag))];
+    rebuildFilterChipsFromTags(tags);
+  }
 }
 
 // ── MERGE SUBJECTS INTO DYNAMIC SCHEDULE ──
@@ -2127,7 +2561,7 @@ const HELP_CONTENT = {
     html: `
       <div class="help-section">
         <h3>What this app does</h3>
-        <p>This is a personal learning roadmap tracker built for your learning journey. The schedule, subjects and tasks are fully customisable.</p>
+        <p>This is a personal learning roadmap tracker. The schedule, subjects and tasks are fully customisable — built by Claude from the roadmap_template.html starting point.</p>
         <div class="help-step">
           <div class="help-step-num">☑</div>
           <div class="help-step-text"><strong>Day-by-day schedule</strong> — a structured 4-week Phase 1 plan with tasks across Swift, AI, PyTorch, Python, and Typing</div>
@@ -2350,19 +2784,6 @@ function updateApiKey() {
 // ══════════════════════════════════════════
 // Start the app — called last so all functions are defined
 autoConnect();
-
-// Apply roadmap name everywhere from single constant
-function applyRoadmapName() {
-  const name = ROADMAP_NAME;
-  document.title = name + ' (' + APP_VERSION + ')';
-  const logo = document.getElementById('app-logo');
-  if (logo) logo.textContent = name;
-  const hero = document.getElementById('app-hero-title');
-  if (hero) hero.innerHTML = '<span>' + name.split(' ')[0] + '</span> ' + name.split(' ').slice(1).join(' ');
-  const aboutName = document.getElementById('about-roadmap-name');
-  if (aboutName) aboutName.textContent = name;
-}
-applyRoadmapName();
 </script>
 </body>
 </html>
