@@ -59,101 +59,6 @@
     pointer-events: none; z-index: 0;
   }
 
-  /* ── SETUP SCREEN ── */
-  #setup-screen {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 1000; padding: 24px;
-  }
-
-  .setup-card {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 20px;
-    padding: 36px 28px;
-    max-width: 420px; width: 100%;
-    box-shadow: 0 0 60px rgba(74, 222, 128, 0.08);
-  }
-
-  .setup-logo {
-    font-family: var(--font-display);
-    font-size: 22px; font-weight: 800;
-    background: linear-gradient(135deg, var(--accent2), var(--accent), var(--accent3));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    margin-bottom: 6px;
-  }
-
-  .setup-sub {
-    font-size: 11px; color: var(--text3);
-    letter-spacing: 2px; text-transform: uppercase;
-    margin-bottom: 28px;
-  }
-
-  .setup-label {
-    font-size: 10px; color: var(--text2);
-    letter-spacing: 1.5px; text-transform: uppercase;
-    margin-bottom: 8px; display: block;
-  }
-
-  .setup-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 12px 14px;
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 13px;
-    margin-bottom: 16px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .setup-input:focus { border-color: var(--accent2); }
-
-  .setup-hint {
-    font-size: 10px; color: var(--text3);
-    line-height: 1.6; margin-bottom: 20px;
-  }
-
-  .setup-hint a { color: var(--accent2); text-decoration: none; }
-
-  .setup-btn {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none; border-radius: 10px;
-    padding: 14px;
-    color: #080c14;
-    font-family: var(--font-mono);
-    font-size: 13px; font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-
-  .setup-btn:active { transform: scale(0.98); opacity: 0.9; }
-
-  .setup-demo {
-    text-align: center; margin-top: 14px;
-    font-size: 11px; color: var(--text3);
-  }
-
-  .setup-demo button {
-    background: none; border: none;
-    color: var(--accent3); font-family: var(--font-mono);
-    font-size: 11px; cursor: pointer;
-    text-decoration: underline;
-  }
-
-  .setup-error {
-    font-size: 11px; color: var(--red);
-    margin-bottom: 12px; padding: 10px 12px;
-    background: rgba(248, 113, 113, 0.08);
-    border: 1px solid rgba(248, 113, 113, 0.2);
-    border-radius: 8px;
-  }
-
   /* ── HEADER ── */
   header {
     position: sticky; top: 0; z-index: 100;
@@ -665,47 +570,6 @@
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
-<div id="setup-screen">
-  <div class="setup-card">
-    <div class="setup-logo">iOS & AI Roadmap</div>
-    <div class="setup-sub">Cross-device progress tracker</div>
-
-    <div id="setup-error" class="setup-error" style="display:none"></div>
-
-    <label class="setup-label">Supabase Project URL</label>
-    <input class="setup-input" id="sb-url" type="url" placeholder="https://xxxx.supabase.co" autocomplete="off" autocorrect="off" autocapitalize="off">
-
-    <label class="setup-label">Supabase Anon Key</label>
-    <input class="setup-input" id="sb-key" type="text" placeholder="eyJhbGc..." autocomplete="off" autocorrect="off" autocapitalize="off">
-
-    <label class="setup-label">Your Name / Device ID</label>
-    <input class="setup-input" id="sb-user" type="text" placeholder="e.g. my-iphone or john" autocomplete="off">
-
-    <div class="setup-hint">
-      1. Create a free project at <a href="https://supabase.com" target="_blank">supabase.com</a><br>
-      2. Go to Project Settings → API to find your URL and anon key<br>
-      3. Run the SQL below in your Supabase SQL editor:<br><br>
-      <code style="font-size:9px;color:#4ade80;display:block;background:#0a1a0a;padding:8px;border-radius:6px;margin-top:4px">
-CREATE TABLE IF NOT EXISTS ios_ai_progress (<br>
-&nbsp;&nbsp;user_id text,<br>
-&nbsp;&nbsp;task_id text,<br>
-&nbsp;&nbsp;done boolean DEFAULT false,<br>
-&nbsp;&nbsp;note varchar(30) DEFAULT '',<br>
-&nbsp;&nbsp;updated_at timestamptz DEFAULT now(),<br>
-&nbsp;&nbsp;PRIMARY KEY (user_id, task_id)<br>
-);
-      </code>
-    </div>
-
-    <button class="setup-btn" onclick="connectSupabase()">Connect & Start →</button>
-
-    <div class="setup-demo">
-      <button onclick="demoMode()">Use offline / demo mode instead</button>
-    </div>
-  </div>
-</div>
-
 <!-- HEADER -->
 <header>
   <div class="header-inner">
@@ -978,60 +842,35 @@ const PHASES = [{
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
-let supabase = null;
-let userId = null;
-let checked = {};
-let notes = {};  // taskId -> string (max 30 chars)
-let activeFilter = 'All';
-let syncMode = 'offline'; // 'live' | 'offline'
+const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
+const SUPABASE_USER = 'roadmap';
 
-// All tasks flat
+let sbClient = null;
+let userId = SUPABASE_USER;
+let checked = {};
+let notes = {};
+let activeFilter = 'All';
+let syncMode = 'offline';
+
 const allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
 const totalCount = allTasks.length;
 
 // ══════════════════════════════════════════
-// SETUP
+// AUTO CONNECT ON LOAD
 // ══════════════════════════════════════════
-function loadSaved() {
-  const saved = localStorage.getItem('sb_config');
-  if (saved) {
-    try {
-      const cfg = JSON.parse(saved);
-      document.getElementById('sb-url').value = cfg.url || '';
-      document.getElementById('sb-key').value = cfg.key || '';
-      document.getElementById('sb-user').value = cfg.user || '';
-    } catch(e) {}
-  }
-}
-
-loadSaved();
-
-async function connectSupabase() {
-  const url = document.getElementById('sb-url').value.trim();
-  const key = document.getElementById('sb-key').value.trim();
-  const user = document.getElementById('sb-user').value.trim();
-  const errEl = document.getElementById('setup-error');
-  errEl.style.display = 'none';
-
-  if (!url || !key || !user) {
-    errEl.textContent = 'Please fill in all fields.';
-    errEl.style.display = 'block'; return;
-  }
-
+async function autoConnect() {
   try {
-    const { createClient } = supabaseJs;
-    supabase = createClient(url, key);
-    userId = user.toLowerCase().replace(/\s+/g, '-');
+    const { createClient } = window.supabase;
+    sbClient = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Test connection by loading progress
-    const { data, error } = await supabase
+    const { data, error } = await sbClient
       .from('ios_ai_progress')
       .select('task_id, done, note')
       .eq('user_id', userId);
 
     if (error) throw error;
 
-    // Load progress and notes
     checked = {};
     notes = {};
     (data || []).forEach(row => {
@@ -1039,62 +878,47 @@ async function connectSupabase() {
       if (row.note) notes[row.task_id] = row.note;
     });
 
-    // Save config
-    localStorage.setItem('sb_config', JSON.stringify({ url, key, user }));
-    localStorage.setItem('checked_local', JSON.stringify(checked));
-
     syncMode = 'live';
-    startApp();
+    updateSyncDot('live');
 
     // Subscribe to realtime changes
-    supabase.channel('progress-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ios_ai_progress', filter: `user_id=eq.${userId}` },
-        (payload) => {
-          if (payload.new) {
-            checked[payload.new.task_id] = payload.new.done;
-            if (payload.new.note !== undefined) notes[payload.new.task_id] = payload.new.note;
-            renderAll();
-          }
-        })
+    sbClient.channel('progress-changes')
+      .on('postgres_changes', {
+        event: '*', schema: 'public',
+        table: 'ios_ai_progress',
+        filter: `user_id=eq.${userId}`
+      }, (payload) => {
+        if (payload.new) {
+          checked[payload.new.task_id] = payload.new.done;
+          if (payload.new.note !== undefined) notes[payload.new.task_id] = payload.new.note;
+          renderAll();
+        }
+      })
       .subscribe();
 
   } catch(e) {
-    errEl.textContent = 'Connection failed: ' + (e.message || 'Check your URL and key.');
-    errEl.style.display = 'block';
+    syncMode = 'offline';
+    updateSyncDot('offline');
+    showToast('Supabase offline — using local storage');
+    const saved = localStorage.getItem('checked_local');
+    checked = saved ? JSON.parse(saved) : {};
+    const savedNotes = localStorage.getItem('notes_local');
+    notes = savedNotes ? JSON.parse(savedNotes) : {};
   }
-}
 
-function demoMode() {
-  syncMode = 'offline';
-  userId = 'demo';
-  const saved = localStorage.getItem('checked_local');
-  checked = saved ? JSON.parse(saved) : {};
-  const savedNotes = localStorage.getItem('notes_local');
-  notes = savedNotes ? JSON.parse(savedNotes) : {};
-  startApp();
-}
-
-function startApp() {
-  document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('settings-user').textContent = userId;
-  document.getElementById('settings-sync').textContent = syncMode === 'live' ? 'Connected to Supabase' : 'Offline / demo mode';
-  updateSyncDot('live');
+  document.getElementById('settings-sync').textContent = syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
   renderAll();
 }
-
-// ══════════════════════════════════════════
-// SYNC
-// ══════════════════════════════════════════
-const supabaseJs = window.supabase;
 
 async function syncTask(taskId, done) {
   localStorage.setItem('checked_local', JSON.stringify(checked));
   localStorage.setItem('notes_local', JSON.stringify(notes));
-  if (syncMode !== 'live' || !supabase) return;
+  if (syncMode !== 'live' || !sbClient) return;
 
   updateSyncDot('syncing');
   try {
-    await supabase.from('ios_ai_progress').upsert(
+    await sbClient.from('ios_ai_progress').upsert(
       { user_id: userId, task_id: taskId, done, note: notes[taskId] || '', updated_at: new Date().toISOString() },
       { onConflict: 'user_id,task_id' }
     );
@@ -1108,11 +932,11 @@ async function syncTask(taskId, done) {
 async function syncNote(taskId, note) {
   notes[taskId] = note;
   localStorage.setItem('notes_local', JSON.stringify(notes));
-  if (syncMode !== 'live' || !supabase) return;
+  if (syncMode !== 'live' || !sbClient) return;
 
   updateSyncDot('syncing');
   try {
-    await supabase.from('ios_ai_progress').upsert(
+    await sbClient.from('ios_ai_progress').upsert(
       { user_id: userId, task_id: taskId, done: !!checked[taskId], note, updated_at: new Date().toISOString() },
       { onConflict: 'user_id,task_id' }
     );
@@ -1123,14 +947,14 @@ async function syncNote(taskId, note) {
 }
 
 async function forceSync() {
-  if (syncMode !== 'live' || !supabase) { showToast('Not connected to Supabase'); return; }
+  if (syncMode !== 'live' || !sbClient) { showToast('Not connected to Supabase'); return; }
   updateSyncDot('syncing');
   try {
     const rows = Object.entries(checked).map(([task_id, done]) => ({
       user_id: userId, task_id, done, note: notes[task_id] || '', updated_at: new Date().toISOString()
     }));
     if (rows.length > 0) {
-      await supabase.from('ios_ai_progress').upsert(rows, { onConflict: 'user_id,task_id' });
+      await sbClient.from('ios_ai_progress').upsert(rows, { onConflict: 'user_id,task_id' });
     }
     updateSyncDot('live');
     showToast('Synced successfully ✓');
@@ -1355,9 +1179,9 @@ function closeSettings(e) {
 }
 
 function reconnect() {
-  localStorage.removeItem('sb_config');
   closeSettings();
-  document.getElementById('setup-screen').style.display = 'flex';
+  autoConnect();
+  showToast('Reconnecting...');
 }
 
 async function resetProgress() {
@@ -1366,8 +1190,8 @@ async function resetProgress() {
   notes = {};
   localStorage.setItem('checked_local', '{}');
   localStorage.setItem('notes_local', '{}');
-  if (syncMode === 'live' && supabase) {
-    await supabase.from('ios_ai_progress').delete().eq('user_id', userId);
+  if (syncMode === 'live' && sbClient) {
+    await sbClient.from('ios_ai_progress').delete().eq('user_id', userId);
   }
   renderAll();
   closeSettings();
@@ -1382,6 +1206,9 @@ function showToast(msg) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
 }
+
+// Start the app — called last so all functions are defined
+autoConnect();
 </script>
 </body>
 </html>

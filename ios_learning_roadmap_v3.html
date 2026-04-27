@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f7f7f5">
-<title>iOS & AI Learning Roadmap (3.02)</title>
+<title>iOS & AI Learning Roadmap (3.05)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -464,6 +464,19 @@
   .task-note-count.warn { color: var(--orange); }
   .task-note-count.over { color: var(--red); }
 
+  .mode-btn {
+    flex: 1; padding: 9px 12px; border-radius: 8px;
+    border: 1px solid var(--border2); background: var(--surface2);
+    color: var(--text2); font-family: var(--font); font-size: 13px;
+    font-weight: 500; cursor: pointer; transition: all 0.15s;
+    text-align: center;
+  }
+
+  .mode-btn.active {
+    background: var(--accent-light); border-color: var(--accent);
+    color: var(--accent-text);
+  }
+
   /* ── TABS ── */
   .tab-btn {
     padding: 6px 16px; border-radius: 99px;
@@ -789,18 +802,23 @@
     <div class="panel-title">Add a new subject</div>
 
     <div style="display:flex;flex-direction:column;gap:14px">
+
+      <!-- MODE TOGGLE -->
       <div>
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <label class="form-label">Anthropic API key</label>
-          <button onclick="openHelp('apikey')" style="background:none;border:none;color:var(--accent);font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;padding:0">How to get & rotate ↗</button>
+        <label class="form-label">How to create the schedule</label>
+        <div style="display:flex;gap:8px">
+          <button class="mode-btn active" id="mode-claude" onclick="selectMode('claude')">✨ Claude generates it</button>
+          <button class="mode-btn" id="mode-manual" onclick="selectMode('manual')">✍ I'll enter it myself</button>
         </div>
-        <input class="form-input" id="as-apikey" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off">
-        <div style="font-size:11px;color:var(--text3);margin-top:5px">Get yours free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>. Stored locally only, never sent anywhere except Anthropic.</div>
       </div>
+
+      <!-- SUBJECT NAME -->
       <div>
         <label class="form-label">Subject name</label>
         <input class="form-input" id="as-name" type="text" placeholder="e.g. JavaScript, React, SQL...">
       </div>
+
+      <!-- HOURS PER WEEK -->
       <div>
         <label class="form-label">Hours per week</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="as-hours-btns">
@@ -810,10 +828,14 @@
           <button class="hours-btn" data-hours="8" onclick="selectHours(this)">8 hrs</button>
         </div>
       </div>
+
+      <!-- START WEEK -->
       <div>
         <label class="form-label">Start from week</label>
         <input class="form-input" id="as-week" type="number" min="1" max="24" value="1" placeholder="1">
       </div>
+
+      <!-- ACCENT COLOUR -->
       <div>
         <label class="form-label">Accent colour</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="as-color-btns">
@@ -827,9 +849,50 @@
           <button class="color-btn" data-color="#14b8a6" style="background:#14b8a6" onclick="selectColor(this)"></button>
         </div>
       </div>
-      <div>
-        <label class="form-label">Context for Claude (optional)</label>
-        <textarea class="form-input" id="as-context" rows="3" placeholder="e.g. I want to build web apps, I already know Python basics, focus on modern ES6+ syntax..."></textarea>
+
+      <!-- CLAUDE MODE FIELDS -->
+      <div id="as-claude-fields">
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label class="form-label">Anthropic API key</label>
+            <button onclick="openHelp('apikey')" style="background:none;border:none;color:var(--accent);font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;padding:0">How to get & rotate ↗</button>
+          </div>
+          <input class="form-input" id="as-apikey" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off">
+          <div style="font-size:11px;color:var(--text3);margin-top:5px">Get yours free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>. Stored locally only.</div>
+        </div>
+        <div style="margin-top:14px">
+          <label class="form-label">Context for Claude (optional)</label>
+          <textarea class="form-input" id="as-context" rows="3" placeholder="e.g. I want to build web apps, I already know Python basics, focus on modern ES6+ syntax..."></textarea>
+        </div>
+      </div>
+
+      <!-- MANUAL MODE FIELDS -->
+      <div id="as-manual-fields" style="display:none">
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:4px">
+          <p style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.5">Enter one main tutorial resource. Claude will use this as the primary resource for all generated tasks, but you keep full control.</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <label class="form-label">Tutorial / resource name</label>
+              <input class="form-input" id="as-resource-name" type="text" placeholder="e.g. The Odin Project — JavaScript Path">
+            </div>
+            <div>
+              <label class="form-label">Tutorial URL</label>
+              <input class="form-input" id="as-resource-url" type="url" placeholder="https://...">
+            </div>
+            <div>
+              <label class="form-label">Description (used to generate tasks)</label>
+              <textarea class="form-input" id="as-resource-desc" rows="3" placeholder="e.g. A free full-stack curriculum covering JavaScript fundamentals through DOM manipulation and async programming..."></textarea>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <label class="form-label">Anthropic API key (still needed to generate task descriptions)</label>
+            <button onclick="openHelp('apikey')" style="background:none;border:none;color:var(--accent);font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;padding:0">↗</button>
+          </div>
+          <input class="form-input" id="as-apikey-manual" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off">
+          <div style="font-size:11px;color:var(--text3);margin-top:4px">Uses far fewer tokens — Claude only writes task descriptions, not search for resources.</div>
+        </div>
       </div>
 
       <div id="as-status" style="display:none;padding:12px;border-radius:8px;font-size:13px"></div>
@@ -970,141 +1033,10 @@
 
 <script>
 // ══════════════════════════════════════════
-// DATA
+// DATA — loaded dynamically from Supabase ios_ai_tasks table
+// PHASES is built at runtime by loadTasksFromSupabase()
 // ══════════════════════════════════════════
-const PHASES = [{
-  id: 1, title: "Phase 1 — Foundations", color: "#4ade80",
-  weeks: [
-    { week: 1, days: [
-      { date: "Thu 28 May 2026", label: "Day 1", tasks: [
-        { id:"1-1-1", time:"Morning 15min", text:"how-to-type.com — Lesson 1: right hand finger placement on J K L ;", resource:"how-to-type.com — Lesson 1", url:"https://www.how-to-type.com/touch-typing-lessons/how-to-type-home-keys/", tag:"Typing" },
-        { id:"1-1-2", time:"Mid-morning 2.5hrs", text:"Python refresh: lists, dicts, lambda functions", resource:"Coursera: Python for Everybody", url:"https://www.coursera.org/learn/python", tag:"Python" },
-        { id:"1-1-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Building with the Claude API — Module 1: API setup, authentication, your first API call", resource:"Anthropic Academy — Building with the Claude API", url:"https://anthropic.skilljar.com/building-with-the-anthropic-api", tag:"AI" },
-        { id:"1-1-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 1, focus on not looking at keyboard", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/how-to-type-home-keys/", tag:"Typing" },
-      ]},
-      { date: "Fri 29 May 2026", label: "Day 2", tasks: [
-        { id:"1-2-1", time:"Morning 15min", text:"how-to-type.com — Lesson 2: left hand finger placement on A S D F", resource:"how-to-type.com — Lesson 2", url:"https://www.how-to-type.com/touch-typing-lessons/how-to-type-home-keys/", tag:"Typing" },
-        { id:"1-2-2", time:"Mid-morning 2.5hrs", text:"Python refresh: classes, OOP basics, file I/O", resource:"Coursera: Python for Everybody", url:"https://www.coursera.org/learn/python", tag:"Python" },
-        { id:"1-2-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Building with the Claude API — Module 2: messages, tokens, system prompts, model selection", resource:"Anthropic Academy — Building with the Claude API", url:"https://anthropic.skilljar.com/building-with-the-anthropic-api", tag:"AI" },
-        { id:"1-2-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 2, both hands on home row, no peeking", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/how-to-type-home-keys/", tag:"Typing" },
-      ]},
-      { date: "Mon 1 Jun 2026", label: "Day 3", tasks: [
-        { id:"1-3-1", time:"Morning 15min", text:"how-to-type.com — Lesson 3: top row keys E R U I — reach up from home row", resource:"how-to-type.com — Lesson 3", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"1-3-2", time:"Mid-morning 2.5hrs", text:"Install Anaconda, setup Jupyter notebook, intro to NumPy", resource:"Anaconda — free download", url:"https://www.anaconda.com/download", tag:"Python" },
-        { id:"1-3-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Building with the Claude API — Module 3: tool use, function calling, structured outputs", resource:"Anthropic Academy — Building with the Claude API", url:"https://anthropic.skilljar.com/building-with-the-anthropic-api", tag:"AI" },
-        { id:"1-3-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 3, top row keys until movements feel automatic", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-      ]},
-      { date: "Tue 2 Jun 2026", label: "Day 4", tasks: [
-        { id:"1-4-1", time:"Morning 15min", text:"how-to-type.com — Lesson 4: bottom row keys C V B N M — reach down from home row", resource:"how-to-type.com — Lesson 4", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"1-4-2", time:"Mid-morning 2.5hrs", text:"Swift: Install Xcode, read Swift Tour on swift.org", resource:"swift.org — A Swift Tour", url:"https://docs.swift.org/swift-book/documentation/the-swift-programming-language/guidedtour/", tag:"Swift" },
-        { id:"1-4-3", time:"Afternoon 2hrs", text:"Swift: Variables, constants, types, string interpolation", resource:"Coursera: iOS App Dev with Swift", url:"https://www.coursera.org/learn/swift-5-ios-app-developer-specialization", tag:"Swift" },
-        { id:"1-4-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 4, bottom row keys, keep fingers returning to home row", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-      ]},
-      { date: "Wed 3 Jun 2026", label: "Day 5", tasks: [
-        { id:"1-5-1", time:"Morning 15min", text:"how-to-type.com — Lesson 5: full keyboard review. Focus on accuracy, do not look at keyboard", resource:"how-to-type.com — Lesson 5", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"1-5-2", time:"Mid-morning 2.5hrs", text:"Swift: Optionals, if-let, guard statements", resource:"YouTube: Sean Allen — Swift for Beginners", url:"https://www.youtube.com/@seanallen", tag:"Swift" },
-        { id:"1-5-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Building with the Claude API — Module 4: RAG, embeddings, agent architecture patterns", resource:"Anthropic Academy — Building with the Claude API", url:"https://anthropic.skilljar.com/building-with-the-anthropic-api", tag:"AI" },
-        { id:"1-5-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 5, full keyboard review, note your end of week WPM", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-      ]},
-    ]},
-    { week: 2, days: [
-      { date: "Thu 4 Jun 2026", label: "Day 6", tasks: [
-        { id:"2-1-1", time:"Morning 15min", text:"how-to-type.com — Lesson 6: capital letters and shift key — both hands now working together", resource:"how-to-type.com — Lesson 6", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"2-1-2", time:"Mid-morning 2.5hrs", text:"Swift: Functions, closures, higher-order functions", resource:"100 Days of SwiftUI — Day 1–5", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"2-1-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Claude Code in Action — Module 1: install Claude Code, first agentic coding session", resource:"Anthropic Academy — Claude Code in Action", url:"https://anthropic.skilljar.com/claude-code-in-action", tag:"AI" },
-        { id:"2-1-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 6, capitals and shift key, accuracy over speed", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-      ]},
-      { date: "Fri 5 Jun 2026", label: "Day 7", tasks: [
-        { id:"2-2-1", time:"Morning 15min", text:"how-to-type.com — Lesson 7: numbers row", resource:"how-to-type.com — Lesson 7", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"2-2-2", time:"Mid-morning 2.5hrs", text:"Swift: Structs, classes, properties, methods", resource:"100 Days of SwiftUI — Day 6–10", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"2-2-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Claude Code in Action — Module 2: CLAUDE.md config, custom slash commands, daily workflow", resource:"Anthropic Academy — Claude Code in Action", url:"https://anthropic.skilljar.com/claude-code-in-action", tag:"AI" },
-        { id:"2-2-4", time:"Evening 15min", text:"how-to-type.com — repeat Lesson 7, numbers row, focus on weak fingers", resource:"how-to-type.com", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-      ]},
-      { date: "Mon 8 Jun 2026", label: "Day 8", tasks: [
-        { id:"2-3-1", time:"Morning 15min", text:"how-to-type.com — Lesson 8: punctuation", resource:"how-to-type.com — Lesson 8", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"2-3-2", time:"Mid-morning 2.5hrs", text:"Swift: Arrays, dictionaries, sets, for loops", resource:"100 Days of SwiftUI — Day 11–15", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"2-3-3", time:"Afternoon 2hrs", text:"Start Calculator app: Create Xcode project, basic UI layout", resource:"YouTube: Sean Allen — Build a Calculator in SwiftUI", url:"https://www.youtube.com/@seanallen", tag:"Swift" },
-        { id:"2-3-4", time:"Evening 15min", text:"Keybr.com — first session, let it adapt to your weak keys", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Tue 9 Jun 2026", label: "Day 9", tasks: [
-        { id:"2-4-1", time:"Morning 15min", text:"how-to-type.com — final lessons: speed building drills, full keyboard practice", resource:"how-to-type.com — Speed drills", url:"https://www.how-to-type.com/touch-typing-lessons/", tag:"Typing" },
-        { id:"2-4-2", time:"Mid-morning 2.5hrs", text:"Anthropic Academy: Claude Code in Action — Module 3: thinking mode, planning mode, context management", resource:"Anthropic Academy — Claude Code in Action", url:"https://anthropic.skilljar.com/claude-code-in-action", tag:"AI" },
-        { id:"2-4-3", time:"Afternoon 2hrs", text:"Calculator app: Add buttons grid, @State for display", resource:"Apple Developer Docs: SwiftUI State", url:"https://developer.apple.com/documentation/swiftui/state", tag:"Swift" },
-        { id:"2-4-4", time:"Evening 15min", text:"Keybr.com — focus on keys it flags as weak", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Wed 10 Jun 2026", label: "Day 10", tasks: [
-        { id:"2-5-1", time:"Morning 15min", text:"Keybr.com — graduate from how-to-type.com. Fingers now know positions, Keybr builds speed adaptively", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"2-5-2", time:"Mid-morning 2.5hrs", text:"Anthropic Academy: Claude Code in Action — Module 4: integrate Claude Code into a real Swift project", resource:"Anthropic Academy — Claude Code in Action", url:"https://anthropic.skilljar.com/claude-code-in-action", tag:"AI" },
-        { id:"2-5-3", time:"Afternoon 2hrs", text:"Calculator app: Add arithmetic logic, polish UI", resource:"YouTube: Sean Allen — SwiftUI Calculator", url:"https://www.youtube.com/@seanallen", tag:"Swift" },
-        { id:"2-5-4", time:"Evening 15min", text:"Keybr.com — second session, let it identify and drill your weakest keys", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-    ]},
-    { week: 3, days: [
-      { date: "Thu 11 Jun 2026", label: "Day 11", tasks: [
-        { id:"3-1-1", time:"Morning 15min", text:"Keybr.com — number row introduction, fingers now know where home row is", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"3-1-2", time:"Mid-morning 2.5hrs", text:"Swift: Protocols, extensions, error handling", resource:"100 Days of SwiftUI — Day 16–20", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"3-1-3", time:"Afternoon 2hrs", text:"Anthropic Academy: Intro to MCP — Module 1: what is MCP, tools, resources and prompts primitives", resource:"Anthropic Academy — Introduction to MCP", url:"https://anthropic.skilljar.com/introduction-to-model-context-protocol", tag:"AI" },
-        { id:"3-1-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Fri 12 Jun 2026", label: "Day 12", tasks: [
-        { id:"3-2-1", time:"Morning 15min", text:"Keybr.com — symbols and punctuation", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"3-2-2", time:"Mid-morning 2.5hrs", text:"Swift: SwiftUI views, VStack, HStack, ZStack, Text, Image", resource:"100 Days of SwiftUI — Day 21–25", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"3-2-3", time:"Afternoon 2hrs", text:"PyTorch: Install PyTorch in Jupyter, tensors intro", resource:"PyTorch — Getting Started Tutorials", url:"https://pytorch.org/tutorials/beginner/basics/intro.html", tag:"PyTorch" },
-        { id:"3-2-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Mon 15 Jun 2026", label: "Day 13", tasks: [
-        { id:"3-3-1", time:"Morning 15min", text:"Keybr.com — full keyboard including numbers", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"3-3-2", time:"Mid-morning 2.5hrs", text:"Swift: Buttons, TextField, @State, @Binding", resource:"Apple Developer — SwiftUI Tutorials", url:"https://developer.apple.com/tutorials/swiftui", tag:"Swift" },
-        { id:"3-3-3", time:"Afternoon 2hrs", text:"PyTorch: Tensor operations, reshaping, basic maths", resource:"YouTube: Daniel Bourke — PyTorch for Deep Learning Ch1", url:"https://www.youtube.com/@mrdbourke", tag:"PyTorch" },
-        { id:"3-3-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Tue 16 Jun 2026", label: "Day 14", tasks: [
-        { id:"3-4-1", time:"Morning 15min", text:"Keybr.com — accuracy focus, slow down if needed", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"3-4-2", time:"Mid-morning 2.5hrs", text:"Anthropic Academy: Intro to MCP — Module 2: build your first MCP server in Python, connect to Claude", resource:"Anthropic Academy — Introduction to MCP", url:"https://anthropic.skilljar.com/introduction-to-model-context-protocol", tag:"AI" },
-        { id:"3-4-3", time:"Afternoon 2hrs", text:"Swift: Navigation, NavigationStack, passing data between views", resource:"100 Days of SwiftUI — Day 26–30", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"3-4-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Wed 17 Jun 2026", label: "Day 15", tasks: [
-        { id:"3-5-1", time:"Morning 15min", text:"Keybr.com — aim for 35 WPM personal best", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"3-5-2", time:"Mid-morning 2.5hrs", text:"Anthropic Academy: Intro to MCP — Module 3: test and debug MCP server using MCP Inspector", resource:"Anthropic Academy — Introduction to MCP", url:"https://anthropic.skilljar.com/introduction-to-model-context-protocol", tag:"AI" },
-        { id:"3-5-3", time:"Afternoon 2hrs", text:"Week review: revise notes, fix any gaps in Swift or AI", resource:"Hacking with Swift — free reference", url:"https://www.hackingwithswift.com", tag:"Review" },
-        { id:"3-5-4", time:"Evening 15min", text:"Keybr.com — record end of week 3 WPM in Keybr stats", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-    ]},
-    { week: 4, days: [
-      { date: "Thu 18 Jun 2026", label: "Day 16", tasks: [
-        { id:"4-1-1", time:"Morning 15min", text:"Keybr.com — full keyboard speed drill", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"4-1-2", time:"Mid-morning 2.5hrs", text:"Swift: Lists, ForEach, ScrollView, dynamic data", resource:"100 Days of SwiftUI — Day 31–35", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"4-1-3", time:"Afternoon 2hrs", text:"Anthropic Academy: MCP Advanced Topics — Module 1: sampling, notifications, stdio vs HTTP transport", resource:"Anthropic Academy — MCP Advanced Topics", url:"https://anthropic.skilljar.com/model-context-protocol-advanced-topics", tag:"AI" },
-        { id:"4-1-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Fri 19 Jun 2026", label: "Day 17", tasks: [
-        { id:"4-2-1", time:"Morning 15min", text:"Keybr.com — weak key focus", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"4-2-2", time:"Mid-morning 2.5hrs", text:"PyTorch: Build first neural network from scratch", resource:"YouTube: Daniel Bourke — PyTorch for Deep Learning Ch2", url:"https://www.youtube.com/@mrdbourke", tag:"PyTorch" },
-        { id:"4-2-3", time:"Afternoon 2hrs", text:"Swift: @ObservableObject, @EnvironmentObject, data flow", resource:"Apple Developer — Data Essentials in SwiftUI (WWDC)", url:"https://developer.apple.com/videos/play/wwdc2020/10040/", tag:"Swift" },
-        { id:"4-2-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Mon 22 Jun 2026", label: "Day 18", tasks: [
-        { id:"4-3-1", time:"Morning 15min", text:"Keybr.com — speed push, aim above comfort zone", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"4-3-2", time:"Mid-morning 2.5hrs", text:"Swift: Sheets, alerts, confirmations — modal UX patterns", resource:"100 Days of SwiftUI — Day 36–40", url:"https://www.hackingwithswift.com/100/swiftui", tag:"Swift" },
-        { id:"4-3-3", time:"Afternoon 2hrs", text:"PyTorch: Training loop, loss functions, optimisers", resource:"PyTorch — Training a Classifier Tutorial", url:"https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html", tag:"PyTorch" },
-        { id:"4-3-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Tue 23 Jun 2026", label: "Day 19", tasks: [
-        { id:"4-4-1", time:"Morning 15min", text:"Keybr.com — consistency drill", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"4-4-2", time:"Mid-morning 2.5hrs", text:"Anthropic Academy: Introduction to Agent Skills — Module 1: write your first SKILL.md, trigger descriptions, directory structure", resource:"Anthropic Academy — Introduction to Agent Skills", url:"https://anthropic.skilljar.com/introduction-to-agent-skills", tag:"AI" },
-        { id:"4-4-3", time:"Afternoon 2hrs", text:"Swift: Finish and polish Calculator app — test all functions", resource:"Apple Developer — Xcode Simulator Guide", url:"https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device", tag:"Swift" },
-        { id:"4-4-4", time:"Evening 15min", text:"Keybr.com — 15 min speed session, focus on accuracy first", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-      { date: "Wed 24 Jun 2026", label: "Day 20", tasks: [
-        { id:"4-5-1", time:"Morning 15min", text:"Keybr.com — Phase 1 final typing test, record WPM", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-        { id:"4-5-2", time:"Mid-morning 2.5hrs", text:"Phase 1 review: Go through all Swift notes, fill gaps", resource:"Hacking with Swift — free reference", url:"https://www.hackingwithswift.com", tag:"Review" },
-        { id:"4-5-3", time:"Afternoon 2hrs", text:"Phase 1 review: revisit Anthropic Academy notes — Claude API, Claude Code, MCP, Agent Skills. Plan what to build next.", resource:"Anthropic Academy — all courses", url:"https://anthropic.skilljar.com", tag:"Review" },
-        { id:"4-5-4", time:"Evening 15min", text:"Keybr.com — Phase 1 final session, screenshot your stats and WPM", resource:"Keybr.com", url:"https://www.keybr.com", tag:"Typing" },
-      ]},
-    ]},
-  ]
-}];
+let PHASES = []; // populated on load
 
 // ══════════════════════════════════════════
 // STATE
@@ -1112,7 +1044,7 @@ const PHASES = [{
 const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
 const SUPABASE_USER = 'roadmap';
-const APP_VERSION   = '3.02';
+const APP_VERSION   = '3.05';
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -1153,6 +1085,28 @@ const CHANGELOG = [
       'Minor version auto-increments with each update',
     ]
   },
+  {
+    version: '3.05',
+    date: '2026-04-27',
+    changes: [
+      'All tasks moved from hardcoded HTML to Supabase ios_ai_tasks table',
+      'PHASES built dynamically at runtime from Supabase rows',
+      'Filter chips generated from actual tags in database — no longer hardcoded',
+      'Seed SQL file provided to populate ios_ai_tasks with Phase 1 data',
+      'App now requires internet to load — tasks no longer embedded in HTML',
+      'Easy to add Phase 2/3/4 by inserting rows in Supabase — no HTML changes needed',
+    ]
+  },
+  {
+    version: '3.04',
+    date: '2026-04-27',
+    changes: [
+      'Added mode toggle to Add Subject panel — Claude generates or manual entry',
+      'Manual mode: enter your own resource name, URL and description — Claude writes task titles only (saves tokens)',
+      'Remove subject button made more prominent in Subjects panel',
+      'Added remove entire subject button directly in schedule view',
+    ]
+  },
 ];
 
 let sbClient = null;
@@ -1164,11 +1118,18 @@ let activeFilter = 'All';
 let syncMode = 'offline';
 let subjects = [];
 let removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
+let tasksLoaded = false;
 
-const allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
-const totalCount = allTasks.length;
+// allTasks, totalCount, taskById computed after PHASES loads from Supabase
+let allTasks = [];
+let totalCount = 0;
 const taskById = {};
-allTasks.forEach(t => taskById[t.id] = t);
+
+function recomputeTaskIndex() {
+  allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
+  totalCount = allTasks.length;
+  allTasks.forEach(t => taskById[t.id] = t);
+}
 
 // ══════════════════════════════════════════
 // DYNAMIC SCHEDULE ENGINE
@@ -1241,6 +1202,87 @@ function buildDynamicSchedule() {
 }
 
 // ══════════════════════════════════════════
+// LOAD TASKS FROM SUPABASE
+// ══════════════════════════════════════════
+async function loadTasksFromSupabase() {
+  // Show loading state
+  const container = document.getElementById('main-content');
+  container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:14px">Loading schedule from Supabase...</div>';
+
+  try {
+    const { data, error } = await sbClient
+      .from('ios_ai_tasks')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--red);font-size:14px">⚠ No tasks found in Supabase.<br><br>Run the seed SQL file in your Supabase SQL editor.</div>';
+      return false;
+    }
+
+    // Assemble PHASES structure from flat rows
+    const phaseMap = {};
+    data.forEach(row => {
+      const pid = row.phase_id;
+      if (!phaseMap[pid]) {
+        phaseMap[pid] = { id: pid, title: row.phase_title, color: row.phase_color, weeks: {} };
+      }
+      const wk = row.week_num;
+      if (!phaseMap[pid].weeks[wk]) {
+        phaseMap[pid].weeks[wk] = { week: wk, date_from: row.week_date_from, date_to: row.week_date_to, days: {} };
+      }
+      const dk = row.day_date;
+      if (!phaseMap[pid].weeks[wk].days[dk]) {
+        phaseMap[pid].weeks[wk].days[dk] = { date: row.day_date, label: row.day_label, tasks: [] };
+      }
+      phaseMap[pid].weeks[wk].days[dk].tasks.push({
+        id: row.id, time: row.time_slot, text: row.text,
+        resource: row.resource, url: row.url, tag: row.tag
+      });
+    });
+
+    // Convert maps to sorted arrays
+    PHASES = Object.values(phaseMap).sort((a,b) => a.id - b.id).map(phase => ({
+      ...phase,
+      weeks: Object.values(phase.weeks).sort((a,b) => a.week - b.week).map(week => ({
+        ...week,
+        days: Object.values(week.days)
+      }))
+    }));
+
+    recomputeTaskIndex();
+    tasksLoaded = true;
+
+    // Rebuild filter chips from actual tags in data
+    const tags = [...new Set(data.map(r => r.tag))];
+    rebuildFilterChipsFromTags(tags);
+
+    return true;
+  } catch(e) {
+    container.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--red);font-size:14px">⚠ Failed to load tasks: ${e.message}</div>`;
+    return false;
+  }
+}
+
+function rebuildFilterChipsFromTags(baseTags) {
+  const scroll = document.querySelector('.filter-scroll');
+  const subjectTags = subjects.map(s => ({ tag: s.tag, name: s.name, color: s.color }));
+  const tagEmojis = { Typing:'⌨', Swift:'🍎', AI:'🧠', PyTorch:'🔥', Python:'🐍', Review:'📝' };
+
+  scroll.innerHTML = `<button class="filter-chip active" onclick="setFilter('All',this)">All</button>` +
+    baseTags.map(t =>
+      `<button class="filter-chip ${activeFilter===t?'active':''}" onclick="setFilter('${t}',this)">${tagEmojis[t]||'📚'} ${t}</button>`
+    ).join('') +
+    subjectTags.map(s =>
+      `<button class="filter-chip ${activeFilter===s.tag?'active':''}" onclick="setFilter('${s.tag}',this)"
+        style="${activeFilter===s.tag?`background:${s.color}22;border-color:${s.color};color:${s.color}`:''}">
+        ${s.name}
+      </button>`
+    ).join('');
+}
+
+// ══════════════════════════════════════════
 // AUTO CONNECT
 // ══════════════════════════════════════════
 async function autoConnect() {
@@ -1289,10 +1331,13 @@ async function autoConnect() {
   document.getElementById('settings-sync').textContent =
     syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
   document.getElementById('settings-version').textContent = 'Current version: v' + APP_VERSION;
+  // Load tasks from Supabase first — everything depends on this
+  const loaded = await loadTasksFromSupabase();
+  if (!loaded) return; // error shown in container
+
   await loadSubjects();
   await loadRemovedTasks();
   await syncChangelog();
-  rebuildFilterChips();
   renderAll();
 }
 
@@ -1479,12 +1524,11 @@ function renderTask(task) {
   const movedBadge = task._movedUp
     ? `<span style="font-size:10px;background:#fef9c3;color:#854d0e;padding:1px 7px;border-radius:99px;font-weight:500;margin-left:4px">moved up ↑</span>`
     : '';
-  const isBaseTask = !!taskById[task.id];
-  const removeBtn = isBaseTask
-    ? `<button onclick="event.stopPropagation();quickRemoveTask('${task.id}')"
-        style="background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:1px"
-        title="Remove this task from schedule">×</button>`
-    : '';
+
+  // Show × for ALL tasks — base tasks go to removedTasks, subject tasks removed from subject
+  const removeBtn = `<button onclick="event.stopPropagation();quickRemoveTask('${task.id}')"
+      style="background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:0;line-height:1;flex-shrink:0;margin-top:1px"
+      title="Remove this task from schedule">×</button>`;
 
   return `
     <div class="task-item ${isDone?'done':''}" onclick="toggleTask('${task.id}')">
@@ -1525,10 +1569,28 @@ function toggleTask(taskId) {
 }
 
 async function quickRemoveTask(taskId) {
-  removedTasks.add(taskId);
-  await saveRemovedTasks();
+  const isBaseTask = !!taskById[taskId];
+
+  if (isBaseTask) {
+    // Base task — add to removedTasks set
+    removedTasks.add(taskId);
+    await saveRemovedTasks();
+    showToast('Task removed — restore via Subjects → Base tasks');
+  } else {
+    // Subject task — remove from the subject's task list
+    let removed = false;
+    for (const subject of subjects) {
+      const idx = subject.tasks.findIndex(t => t.id === taskId);
+      if (idx !== -1) {
+        subject.tasks.splice(idx, 1);
+        removed = true;
+        await saveSubject(subject, true); // true = update existing, not push new
+        break;
+      }
+    }
+    if (removed) showToast('Task removed from subject ✓');
+  }
   renderAll();
-  showToast('Task removed — tap Subjects → Base tasks to restore');
 }
 
 let noteTimers = {};
@@ -1611,6 +1673,21 @@ function showToast(msg) {
 
 let selectedHours = 2;
 let selectedColor = '#6366f1';
+let selectedMode  = 'claude'; // 'claude' | 'manual'
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.getElementById('mode-claude').classList.toggle('active', mode === 'claude');
+  document.getElementById('mode-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('as-claude-fields').style.display = mode === 'claude' ? 'flex' : 'none';
+  document.getElementById('as-manual-fields').style.display = mode === 'manual' ? 'flex' : 'none';
+  document.getElementById('as-claude-fields').style.flexDirection = 'column';
+  document.getElementById('as-manual-fields').style.flexDirection = 'column';
+  const btn = document.getElementById('as-generate-btn');
+  btn.innerHTML = mode === 'claude'
+    ? 'Generate schedule with Claude ✨'
+    : 'Generate tasks with my resource ✍';
+}
 
 // ── SUBJECT PERSISTENCE ──
 async function loadSubjects() {
@@ -1631,8 +1708,8 @@ async function loadSubjects() {
   } catch(e) { console.warn('Could not load subjects from Supabase:', e.message); }
 }
 
-async function saveSubject(subject) {
-  subjects.push(subject);
+async function saveSubject(subject, updateExisting = false) {
+  if (!updateExisting) subjects.push(subject);
   localStorage.setItem('subjects_local', JSON.stringify(subjects));
   if (syncMode !== 'live' || !sbClient) return;
   try {
@@ -1645,7 +1722,7 @@ async function saveSubject(subject) {
       hours_per_week: subject.hoursPerWeek,
       start_week: subject.startWeek,
       tasks_json: JSON.stringify(subject.tasks),
-      created_at: new Date().toISOString()
+      created_at: subject.createdAt || new Date().toISOString()
     }, { onConflict: 'id' });
   } catch(e) { console.warn('Could not save subject:', e.message); }
 }
@@ -1666,13 +1743,19 @@ function openAddSubject() {
   document.getElementById('as-context').value = '';
   document.getElementById('as-week').value = '1';
   document.getElementById('as-apikey').value = localStorage.getItem('anthropic_api_key') || '';
+  document.getElementById('as-apikey-manual').value = localStorage.getItem('anthropic_api_key') || '';
+  document.getElementById('as-resource-name').value = '';
+  document.getElementById('as-resource-url').value = '';
+  document.getElementById('as-resource-desc').value = '';
   document.getElementById('as-status').style.display = 'none';
   document.getElementById('as-generate-btn').disabled = false;
-  document.getElementById('as-generate-btn').innerHTML = 'Generate schedule with Claude ✨';
-  // Reset selections
+  // Reset mode to claude
+  selectMode('claude');
+  // Reset hour selection
   document.querySelectorAll('.hours-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.hours-btn[data-hours="2"]').classList.add('active');
   selectedHours = 2;
+  // Reset colour selection
   document.querySelectorAll('.color-btn').forEach((b,i) => {
     b.classList.remove('selected');
     b.textContent = '';
@@ -1701,33 +1784,111 @@ function selectColor(btn) {
 
 // ── CLAUDE-POWERED TASK GENERATION ──
 async function generateSubject() {
-  const name    = document.getElementById('as-name').value.trim();
-  const context = document.getElementById('as-context').value.trim();
+  const name      = document.getElementById('as-name').value.trim();
   const startWeek = parseInt(document.getElementById('as-week').value) || 1;
-  const apiKey  = document.getElementById('as-apikey').value.trim()
-                  || localStorage.getItem('anthropic_api_key') || '';
-  const statusEl = document.getElementById('as-status');
-  const btn = document.getElementById('as-generate-btn');
+  const statusEl  = document.getElementById('as-status');
+  const btn       = document.getElementById('as-generate-btn');
 
   if (!name) { showStatus('Please enter a subject name.', 'error'); return; }
-  if (!apiKey) { showStatus('Please enter your Anthropic API key.', 'error'); return; }
 
-  // Save key locally for convenience
-  localStorage.setItem('anthropic_api_key', apiKey);
-
-  // Build tag from name (strip spaces, capitalise)
   const tag = name.replace(/\s+/g, '').slice(0, 12);
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="generating-spinner"></span>Claude is building your schedule...';
-  showStatus('Calling Claude API — this takes about 10 seconds...', 'info');
-
-  const totalWeeks = 4; // Phase 1 = 4 weeks
+  const totalWeeks  = 4;
   const daysPerWeek = 5;
   const hoursPerDay = selectedHours / daysPerWeek;
   const sessionLabel = hoursPerDay >= 1
     ? Math.round(hoursPerDay) + 'hr' + (hoursPerDay > 1 ? 's' : '')
     : Math.round(hoursPerDay * 60) + 'min';
+
+  // ── MANUAL MODE ──
+  if (selectedMode === 'manual') {
+    const resourceName = document.getElementById('as-resource-name').value.trim();
+    const resourceUrl  = document.getElementById('as-resource-url').value.trim();
+    const resourceDesc = document.getElementById('as-resource-desc').value.trim();
+    const apiKey = document.getElementById('as-apikey-manual').value.trim()
+                   || localStorage.getItem('anthropic_api_key') || '';
+
+    if (!resourceName || !resourceUrl) {
+      showStatus('Please enter a resource name and URL.', 'error'); return;
+    }
+    if (!apiKey) { showStatus('Please enter your Anthropic API key.', 'error'); return; }
+    localStorage.setItem('anthropic_api_key', apiKey);
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="generating-spinner"></span>Generating task descriptions...';
+    showStatus('Using your resource — Claude writes task titles only (saves tokens)...', 'info');
+
+    const manualPrompt = `You are a curriculum designer. Generate a day-by-day learning schedule for "${name}" using this specific resource:
+
+Resource name: ${resourceName}
+Resource URL: ${resourceUrl}
+Description: ${resourceDesc || 'No description provided.'}
+
+Requirements:
+- ${selectedHours} hours per week across 5 days, roughly ${sessionLabel} per day
+- ${totalWeeks} weeks total starting from week ${startWeek}
+- Each task must use the resource name and URL provided above (all tasks link to the same resource)
+- Write specific, progressive task descriptions that guide what to study each day from that resource
+- Descriptions should reference specific topics or sections to study
+
+Return ONLY a valid JSON array with exactly ${totalWeeks * daysPerWeek} task objects. No explanation, no markdown.
+
+Each object:
+{
+  "id": "custom-${tag}-W1D1",
+  "week": 1,
+  "day": 1,
+  "time": "${sessionLabel}",
+  "text": "Specific description of what to study today",
+  "resource": "${resourceName}",
+  "url": "${resourceUrl}",
+  "tag": "${tag}"
+}
+
+Use id format: "custom-${tag}-W{week}D{day}". Weeks 1–${totalWeeks}, days 1–5.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 3000,
+          messages: [{ role: 'user', content: manualPrompt }]
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || 'API error');
+      const text = data.content?.find(b => b.type === 'text')?.text || '';
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('Could not parse tasks from Claude response');
+      const tasks = JSON.parse(jsonMatch[0]);
+      if (!Array.isArray(tasks) || tasks.length === 0) throw new Error('Empty task list');
+      await _finishSubjectCreation(name, tag, startWeek, tasks, btn);
+    } catch(e) {
+      showStatus('Error: ' + e.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = 'Try again ↺';
+      btn.onclick = generateSubject;
+    }
+    return;
+  }
+
+  // ── CLAUDE MODE ──
+  const context = document.getElementById('as-context').value.trim();
+  const apiKey  = document.getElementById('as-apikey').value.trim()
+                  || localStorage.getItem('anthropic_api_key') || '';
+
+  if (!apiKey) { showStatus('Please enter your Anthropic API key.', 'error'); return; }
+  localStorage.setItem('anthropic_api_key', apiKey);
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="generating-spinner"></span>Claude is building your schedule...';
+  showStatus('Calling Claude API — this takes about 10 seconds...', 'info');
 
   const prompt = `You are a curriculum designer. Generate a day-by-day learning schedule for "${name}".
 
@@ -1773,50 +1934,43 @@ Make sure all URLs are real, working URLs.`;
         messages: [{ role: 'user', content: prompt }]
       })
     });
-
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || 'API error');
-
     const text = data.content?.find(b => b.type === 'text')?.text || '';
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) throw new Error('Could not parse task list from Claude response');
-
     const tasks = JSON.parse(jsonMatch[0]);
     if (!Array.isArray(tasks) || tasks.length === 0) throw new Error('Empty task list returned');
-
-    // Add startWeek offset to week numbers
-    const offsetTasks = tasks.map(t => ({
-      ...t,
-      week: (t.week - 1) + startWeek,
-      id: t.id.replace(`-W${t.week}D`, `-W${(t.week-1)+startWeek}D`)
-    }));
-
-    const subject = {
-      id: 'subj-' + Date.now(),
-      name, tag, color: selectedColor,
-      hoursPerWeek: selectedHours,
-      startWeek,
-      tasks: offsetTasks,
-      createdAt: new Date().toISOString()
-    };
-
-    await saveSubject(subject);
-
-    // Rebuild filter chips to include new tag
-    rebuildFilterChips();
-
-    showStatus(`✓ ${tasks.length} tasks generated for "${name}" — schedule updated!`, 'success');
-    btn.innerHTML = '✓ Added! Close this panel';
-    btn.disabled = false;
-    btn.onclick = () => { closeAddSubject(); renderAll(); };
-    renderAll();
-
+    await _finishSubjectCreation(name, tag, startWeek, tasks, btn);
   } catch(e) {
     showStatus('Error: ' + e.message, 'error');
     btn.disabled = false;
     btn.innerHTML = 'Try again ↺';
     btn.onclick = generateSubject;
   }
+}
+
+async function _finishSubjectCreation(name, tag, startWeek, tasks, btn) {
+  const offsetTasks = tasks.map(t => ({
+    ...t,
+    week: (t.week - 1) + startWeek,
+    id: t.id.replace(`-W${t.week}D`, `-W${(t.week-1)+startWeek}D`)
+  }));
+  const subject = {
+    id: 'subj-' + Date.now(),
+    name, tag, color: selectedColor,
+    hoursPerWeek: selectedHours,
+    startWeek,
+    tasks: offsetTasks,
+    createdAt: new Date().toISOString()
+  };
+  await saveSubject(subject);
+  rebuildFilterChips();
+  showStatus(`✓ ${offsetTasks.length} tasks created for "${name}" — schedule updated!`, 'success');
+  btn.innerHTML = '✓ Added! Close this panel';
+  btn.disabled = false;
+  btn.onclick = () => { closeAddSubject(); renderAll(); };
+  renderAll();
 }
 
 function showStatus(msg, type) {
@@ -1874,7 +2028,10 @@ function renderSubjectsList() {
           <div style="font-size:11px;color:var(--text3)">${s.hoursPerWeek} hrs/week · week ${s.startWeek} · ${s.tasks.length} tasks</div>
         </div>
       </div>
-      <button class="subject-remove" onclick="removeSubject('${s.id}')" title="Remove subject">×</button>
+      <button class="panel-btn danger" onclick="removeSubject('${s.id}')"
+        style="font-size:11px;padding:6px 10px;white-space:nowrap">
+        Remove ×
+      </button>
     </div>
   `).join('');
 }
@@ -2030,17 +2187,11 @@ async function loadChangelog() {
 
 // ── FILTER CHIPS ──
 function rebuildFilterChips() {
-  const scroll = document.querySelector('.filter-scroll');
-  const baseTags = ['All', 'Typing', 'Swift', 'AI', 'PyTorch', 'Python', 'Review'];
-  const subjectTags = subjects.map(s => ({ tag: s.tag, name: s.name, color: s.color }));
-
-  scroll.innerHTML = baseTags.map(f =>
-    `<button class="filter-chip ${activeFilter===f?'active':''}" onclick="setFilter('${f}',this)">${f}</button>`
-  ).join('') + subjectTags.map(s =>
-    `<button class="filter-chip ${activeFilter===s.tag?'active':''}" onclick="setFilter('${s.tag}',this)" style="${activeFilter===s.tag?`background:${s.color}22;border-color:${s.color};color:${s.color}`:''}">
-      ${s.name}
-    </button>`
-  ).join('');
+  // Re-derive base tags from loaded tasks, then rebuild
+  if (allTasks.length > 0) {
+    const tags = [...new Set(allTasks.map(t => t.tag))];
+    rebuildFilterChipsFromTags(tags);
+  }
 }
 
 // ── MERGE SUBJECTS INTO DYNAMIC SCHEDULE ──
