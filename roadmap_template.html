@@ -713,7 +713,7 @@
 </div>
 <header>
   <div class="header-inner">
-    <div class="logo">iOS & AI Roadmap</div>
+    <div class="logo" id="app-logo">My Learning Roadmap</div>
     <div class="header-right">
       <div class="sync-indicator">
         <div class="sync-dot" id="sync-dot"></div>
@@ -726,7 +726,7 @@
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-title"><span>My</span> Learning Roadmap</div>
+  <div class="hero-title" id="app-hero-title"><span>My</span> Learning Roadmap</div>
   <div class="hero-sub">Your schedule · 5 days/week</div>
 
   <div class="progress-section">
@@ -1062,6 +1062,7 @@ const SUPABASE_URL  = 'YOUR_SUPABASE_URL'; // ← paste your Supabase project UR
 const SUPABASE_KEY  = 'YOUR_SUPABASE_ANON_KEY'; // ← paste your Supabase anon key
 const SUPABASE_USER = 'my-roadmap'; // ← change this per roadmap (e.g. 'spanish', 'fitness')
 const APP_VERSION   = '1.00';
+const ROADMAP_NAME  = 'My Learning Roadmap'; // ← change this to your schedule name
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -2126,7 +2127,7 @@ const HELP_CONTENT = {
     html: `
       <div class="help-section">
         <h3>What this app does</h3>
-        <p>This is a personal learning roadmap tracker built specifically for your journey into iOS development, AI, PyTorch, and touch typing.</p>
+        <p>This is a personal learning roadmap tracker built for your learning journey. The schedule, subjects and tasks are fully customisable.</p>
         <div class="help-step">
           <div class="help-step-num">☑</div>
           <div class="help-step-text"><strong>Day-by-day schedule</strong> — a structured 4-week Phase 1 plan with tasks across Swift, AI, PyTorch, Python, and Typing</div>
@@ -2180,7 +2181,7 @@ const HELP_CONTENT = {
 
       <div class="help-section">
         <h3>Version</h3>
-        <p style="color:var(--text3);font-size:12px">iOS & AI Learning Roadmap · v<span class="app-version-display"></span> · Built with Claude Sonnet · April 2026</p>
+        <p style="color:var(--text3);font-size:12px"><span id="about-roadmap-name">My Learning Roadmap</span> · v<span class="app-version-display"></span> · Built with Claude Sonnet</p>
       </div>
     `
   },
@@ -2349,6 +2350,19 @@ function updateApiKey() {
 // ══════════════════════════════════════════
 // Start the app — called last so all functions are defined
 autoConnect();
+
+// Apply roadmap name everywhere from single constant
+function applyRoadmapName() {
+  const name = ROADMAP_NAME;
+  document.title = name + ' (' + APP_VERSION + ')';
+  const logo = document.getElementById('app-logo');
+  if (logo) logo.textContent = name;
+  const hero = document.getElementById('app-hero-title');
+  if (hero) hero.innerHTML = '<span>' + name.split(' ')[0] + '</span> ' + name.split(' ').slice(1).join(' ');
+  const aboutName = document.getElementById('about-roadmap-name');
+  if (aboutName) aboutName.textContent = name;
+}
+applyRoadmapName();
 </script>
 </body>
 </html>
