@@ -957,6 +957,8 @@ let notes = {};
 let completedAt = {};
 let activeFilter = 'All';
 let syncMode = 'offline';
+let subjects = [];
+let removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
 
 const allTasks = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.flatMap(d => d.tasks)));
 const totalCount = allTasks.length;
@@ -1374,7 +1376,6 @@ function showToast(msg) {
 // Progress is preserved by task_id even when curriculum changes.
 // ══════════════════════════════════════════
 
-let subjects = [];        // [{id, name, tag, color, hoursPerWeek, startWeek, tasks:[]}]
 let selectedHours = 2;
 let selectedColor = '#6366f1';
 
@@ -1685,9 +1686,6 @@ async function removeSubject(subjectId) {
 }
 
 // ── BASE TASK REMOVAL ──
-// removedTasks is a Set of task IDs hidden from the base schedule
-let removedTasks = new Set(JSON.parse(localStorage.getItem('removed_tasks') || '[]'));
-
 async function saveRemovedTasks() {
   const arr = [...removedTasks];
   localStorage.setItem('removed_tasks', JSON.stringify(arr));
