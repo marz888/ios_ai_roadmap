@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f7f7f5">
-<title>iOS & AI Learning Roadmap (3.06)</title>
+<title>iOS & AI Learning Roadmap (3.08)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -758,7 +758,7 @@
 <!-- HERO -->
 <div class="hero">
   <div class="hero-title"><span>Phase 1</span> — Foundations</div>
-  <div class="hero-sub">Thu 28 May – Wed 24 Jun 2026 · 5 days/week</div>
+  <div class="hero-sub">Tue 28 Apr – Mon 25 May 2026 · 5 days/week</div>
 
   <div class="progress-section">
     <div class="progress-ring-wrap">
@@ -1081,7 +1081,7 @@ let PHASES = []; // populated on load
 const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
 const SUPABASE_USER = 'roadmap';
-const APP_VERSION   = '3.06';
+const APP_VERSION   = '3.08';
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -1120,6 +1120,27 @@ const CHANGELOG = [
       'Added changelog system — every update saved to Supabase ios_ai_changelog table',
       'Change history viewable in Settings → View changelog',
       'Minor version auto-increments with each update',
+    ]
+  },
+  {
+    version: '3.08',
+    date: '2026-04-27',
+    changes: [
+      'Weeks now start on Monday except Week 1 which starts mid-week (Tue 28 Apr)',
+      'Week 1: Tue 28 Apr – Fri 1 May 2026 (4 days)',
+      'Weeks 2–4: full Mon–Fri weeks',
+      'Week 5: Mon 25 May 2026 (Day 20 only)',
+      'Re-run seed_tasks.sql in Supabase to apply updated dates',
+    ]
+  },
+  {
+    version: '3.07',
+    date: '2026-04-27',
+    changes: [
+      'Rescheduled all dates to start Tue 28 Apr 2026 (was Thu 28 May 2026)',
+      'Phase 1 now runs Tue 28 Apr – Mon 25 May 2026',
+      'All 20 working days recalculated correctly on Mon–Fri calendar',
+      'Updated seed_tasks.sql with corrected dates — re-run in Supabase',
     ]
   },
   {
