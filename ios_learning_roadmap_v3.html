@@ -987,7 +987,7 @@ function buildDynamicSchedule() {
   const pendingIdx = {};
   Object.keys(pendingByTag).forEach(tag => pendingIdx[tag] = 0);
 
-  // Build a flat indexed array: each entry knows its phaseIdx and weekIdx
+  // Build flat indexed schedule
   const schedule = [];
   PHASES.forEach((phase, phaseIdx) => {
     phase.weeks.forEach((week, weekIdx) => {
@@ -1008,6 +1008,29 @@ function buildDynamicSchedule() {
       });
     });
   });
+
+  // Merge custom subjects into schedule
+  subjects.forEach(subject => {
+    const pendingSubjectTasks = subject.tasks.filter(t => !checked[t.id]);
+    let subjPendingIdx = 0;
+
+    schedule.forEach(entry => {
+      const weekNum   = entry.weekIdx + 1;
+      const dayOfWeek = entry.dayIdx + 1;
+      const originalSlot = subject.tasks.find(t => t.week === weekNum && t.day === dayOfWeek);
+      if (!originalSlot) return;
+
+      if (checked[originalSlot.id]) {
+        entry.dynamicTasks.push({ ...originalSlot, _status: 'done', _movedUp: false });
+      } else if (subjPendingIdx < pendingSubjectTasks.length) {
+        const next = pendingSubjectTasks[subjPendingIdx++];
+        entry.dynamicTasks.push({ ...next, _status: 'pending', _movedUp: next.id !== originalSlot.id });
+      }
+    });
+  });
+
+  // Inject tag colour styles
+  injectSubjectStyles();
 
   return schedule;
 }
@@ -1781,31 +1804,9 @@ function rebuildFilterChips() {
 }
 
 // ── MERGE SUBJECTS INTO DYNAMIC SCHEDULE ──
-// Override buildDynamicSchedule to also include subject tasks
-const _originalBuildDynamicSchedule = buildDynamicSchedule;
-function buildDynamicSchedule() {
-  const base = _originalBuildDynamicSchedule();
-
-  subjects.forEach(subject => {
-    const pendingSubjectTasks = subject.tasks.filter(t => !checked[t.id]);
-    let pendingIdx = 0;
-
-    base.forEach(entry => {
-      const week    = entry.weekIdx + 1;
-      const dayOfWeek = entry.dayIdx + 1;
-      const originalSlot = subject.tasks.find(t => t.week === week && t.day === dayOfWeek);
-      if (!originalSlot) return;
-
-      if (checked[originalSlot.id]) {
-        entry.dynamicTasks.push({ ...originalSlot, _status: 'done', _movedUp: false });
-      } else if (pendingIdx < pendingSubjectTasks.length) {
-        const next = pendingSubjectTasks[pendingIdx++];
-        entry.dynamicTasks.push({ ...next, _status: 'pending', _movedUp: next.id !== originalSlot.id });
-      }
-    });
-  });
-
-  // Inject tag colour styles for custom subjects
+// Subjects are merged directly inside buildDynamicSchedule above.
+// This section injects tag colour styles only.
+function injectSubjectStyles() {
   subjects.forEach(s => {
     const styleId = 'tag-style-' + s.tag;
     if (!document.getElementById(styleId)) {
@@ -1815,8 +1816,6 @@ function buildDynamicSchedule() {
       document.head.appendChild(style);
     }
   });
-
-  return base;
 }
 
 // ══════════════════════════════════════════
