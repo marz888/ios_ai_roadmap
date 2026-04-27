@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f7f7f5">
-<title>iOS & AI Learning Roadmap (3.08)</title>
+<title>iOS & AI Learning Roadmap (3.09)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1081,7 +1081,7 @@ let PHASES = []; // populated on load
 const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
 const SUPABASE_USER = 'roadmap';
-const APP_VERSION   = '3.08';
+const APP_VERSION   = '3.09';
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -1120,6 +1120,16 @@ const CHANGELOG = [
       'Added changelog system — every update saved to Supabase ios_ai_changelog table',
       'Change history viewable in Settings → View changelog',
       'Minor version auto-increments with each update',
+    ]
+  },
+  {
+    version: '3.09',
+    date: '2026-04-27',
+    changes: [
+      'Added user_id to ios_ai_tasks — tasks are now fully per-roadmap isolated',
+      'Added user_id to ios_ai_changelog — changelog entries scoped per roadmap',
+      'All Supabase queries now filter by user_id — roadmaps are completely independent',
+      'Re-run seed_tasks.sql in Supabase to apply schema changes',
     ]
   },
   {
@@ -1315,6 +1325,7 @@ async function loadTasksFromSupabase() {
     const { data, error } = await sbClient
       .from('ios_ai_tasks')
       .select('*')
+      .eq('user_id', userId)
       .order('sort_order', { ascending: true });
 
     if (error) throw error;
@@ -2406,9 +2417,10 @@ async function restoreAllTasks() {
 async function syncChangelog() {
   if (syncMode !== 'live' || !sbClient) return;
   try {
-    // Upsert each version entry — idempotent, safe to call on every load
     const rows = CHANGELOG.map(entry => ({
-      version: entry.version,
+      user_id: userId,
+      version: `${userId}-${entry.version}`, // unique per roadmap
+      roadmap_version: entry.version,
       date: entry.date,
       changes_json: JSON.stringify(entry.changes),
       updated_at: new Date().toISOString()
