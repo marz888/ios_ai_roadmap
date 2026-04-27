@@ -971,7 +971,6 @@ allTasks.forEach(t => taskById[t.id] = t);
 // task of the same category into the current slot.
 // ══════════════════════════════════════════
 function buildDynamicSchedule() {
-  // Tasks filtered by removal
   const visibleTasks = allTasks.filter(t => !removedTasks.has(t.id));
 
   const queueByTag = {};
@@ -988,25 +987,29 @@ function buildDynamicSchedule() {
   const pendingIdx = {};
   Object.keys(pendingByTag).forEach(tag => pendingIdx[tag] = 0);
 
-  const allDays = PHASES.flatMap(p => p.weeks.flatMap(w =>
-    w.days.map(d => ({ ...d, phase: p, week: w }))
-  ));
+  // Build a flat indexed array: each entry knows its phaseIdx and weekIdx
+  const schedule = [];
+  PHASES.forEach((phase, phaseIdx) => {
+    phase.weeks.forEach((week, weekIdx) => {
+      week.days.forEach((day, dayIdx) => {
+        const dynamicTasks = day.tasks
+          .filter(orig => !removedTasks.has(orig.id))
+          .map(orig => {
+            if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
+            const pending = pendingByTag[orig.tag] || [];
+            if (pendingIdx[orig.tag] < pending.length) {
+              const next = pending[pendingIdx[orig.tag]++];
+              return { ...next, _status: 'pending', _movedUp: next.id !== orig.id };
+            }
+            return null;
+          }).filter(Boolean);
 
-  return allDays.map(day => {
-    const dynamicTasks = day.tasks
-      .filter(orig => !removedTasks.has(orig.id))
-      .map(orig => {
-        const tag = orig.tag;
-        if (checked[orig.id]) return { ...orig, _status: 'done', _movedUp: false };
-        const pending = pendingByTag[tag] || [];
-        if (pendingIdx[tag] < pending.length) {
-          const next = pending[pendingIdx[tag]++];
-          return { ...next, _status: 'pending', _movedUp: next.id !== orig.id };
-        }
-        return null;
-      }).filter(Boolean);
-    return { ...day, dynamicTasks };
+        schedule.push({ phaseIdx, weekIdx, dayIdx, day, dynamicTasks });
+      });
+    });
   });
+
+  return schedule;
 }
 
 // ══════════════════════════════════════════
@@ -1180,11 +1183,8 @@ function renderWeeks() {
 
   PHASES.forEach((phase, pi) => {
     phase.weeks.forEach((week, wi) => {
-      // Match schedule days by week number and phase index, not object reference
-      const scheduledDays = schedule.filter(d =>
-        d.week.week === week.week && d.phase.id === phase.id
-      );
-      const weekTasks = scheduledDays.flatMap(d => d.dynamicTasks);
+      const scheduledDays = schedule.filter(s => s.phaseIdx === pi && s.weekIdx === wi);
+      const weekTasks = scheduledDays.flatMap(s => s.dynamicTasks);
       const weekDone  = weekTasks.filter(t => checked[t.id]).length;
       const isOpen    = wi === 0;
       const dateFrom  = week.days[0].date.split(' ').slice(1).join(' ');
@@ -1208,17 +1208,17 @@ function renderWeeks() {
           </div>
         </button>
         <div class="days-container ${isOpen ? 'open' : ''}" id="days-${pi}-${wi}">
-          ${scheduledDays.map((day, di) => renderDay(day, pi, wi, di)).join('')}
+          ${scheduledDays.map((s, di) => renderDay(s.day, s.dynamicTasks, pi, wi, di)).join('')}
         </div>`;
       container.appendChild(block);
     });
   });
 }
 
-function renderDay(day, pi, wi, di) {
-  const tasks   = activeFilter === 'All' ? day.dynamicTasks : day.dynamicTasks.filter(t => t.tag === activeFilter);
-  const dayDone = day.dynamicTasks.filter(t => checked[t.id]).length;
-  const allDone = dayDone === day.dynamicTasks.length;
+function renderDay(day, dynamicTasks, pi, wi, di) {
+  const tasks   = activeFilter === 'All' ? dynamicTasks : dynamicTasks.filter(t => t.tag === activeFilter);
+  const dayDone = dynamicTasks.filter(t => checked[t.id]).length;
+  const allDone = dynamicTasks.length > 0 && dayDone === dynamicTasks.length;
   if (tasks.length === 0) return '';
   return `
     <div class="day-block">
@@ -1231,7 +1231,7 @@ function renderDay(day, pi, wi, di) {
           </div>
         </div>
         <div class="day-right">
-          <span class="day-progress" style="color:${allDone?'var(--green)':''}">${dayDone}/${day.dynamicTasks.length}</span>
+          <span class="day-progress" style="color:${allDone?'var(--green)':''}">${dayDone}/${dynamicTasks.length}</span>
           <span style="color:var(--text3);font-size:11px" id="chev-${pi}-${wi}-${di}">▼</span>
         </div>
       </button>
@@ -1784,44 +1784,34 @@ function rebuildFilterChips() {
 // Override buildDynamicSchedule to also include subject tasks
 const _originalBuildDynamicSchedule = buildDynamicSchedule;
 function buildDynamicSchedule() {
-  // First build the base schedule
   const base = _originalBuildDynamicSchedule();
 
-  // For each subject, inject tasks into the correct day slots
   subjects.forEach(subject => {
     const pendingSubjectTasks = subject.tasks.filter(t => !checked[t.id]);
     let pendingIdx = 0;
 
-    base.forEach(day => {
-      const dayIndex = base.indexOf(day);
-      const week = Math.floor(dayIndex / 5) + 1;
-      const dayOfWeek = (dayIndex % 5) + 1;
-
-      // Find original subject task for this slot
+    base.forEach(entry => {
+      const week    = entry.weekIdx + 1;
+      const dayOfWeek = entry.dayIdx + 1;
       const originalSlot = subject.tasks.find(t => t.week === week && t.day === dayOfWeek);
       if (!originalSlot) return;
 
       if (checked[originalSlot.id]) {
-        // Already done — show in place
-        day.dynamicTasks.push({ ...originalSlot, _status: 'done', _movedUp: false });
+        entry.dynamicTasks.push({ ...originalSlot, _status: 'done', _movedUp: false });
       } else if (pendingIdx < pendingSubjectTasks.length) {
         const next = pendingSubjectTasks[pendingIdx++];
-        day.dynamicTasks.push({
-          ...next, _status: 'pending',
-          _movedUp: next.id !== originalSlot.id
-        });
+        entry.dynamicTasks.push({ ...next, _status: 'pending', _movedUp: next.id !== originalSlot.id });
       }
     });
   });
 
-  // Inject tag colours for subject tasks into page styles
+  // Inject tag colour styles for custom subjects
   subjects.forEach(s => {
     const styleId = 'tag-style-' + s.tag;
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
       style.id = styleId;
-      const hex = s.color;
-      style.textContent = `.tag-${s.tag}{background:${hex}22;color:${hex};border:1px solid ${hex}44}`;
+      style.textContent = `.tag-${s.tag}{background:${s.color}22;color:${s.color};border:1px solid ${s.color}44}`;
       document.head.appendChild(style);
     }
   });
