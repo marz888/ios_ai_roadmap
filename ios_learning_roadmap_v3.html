@@ -514,6 +514,105 @@
   .task-toggle-btn.remove { color: var(--red); border-color: #fca5a5; }
   .task-toggle-btn.restore { color: var(--green); border-color: #86efac; }
 
+  /* ── CHANGELOG ── */
+  .changelog-entry { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .changelog-entry:last-child { border-bottom: none; margin-bottom: 0; }
+  .changelog-version {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .changelog-version-num {
+    font-size: 15px; font-weight: 700; color: var(--text);
+  }
+  .changelog-version-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px;
+    border-radius: 99px; background: var(--accent-light);
+    color: var(--accent-text);
+  }
+  .changelog-date { font-size: 11px; color: var(--text3); margin-left: auto; }
+  .changelog-item {
+    display: flex; gap: 8px; align-items: flex-start;
+    margin-bottom: 6px; font-size: 13px; color: var(--text2); line-height: 1.5;
+  }
+  .changelog-bullet {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--accent); flex-shrink: 0; margin-top: 7px;
+  }
+
+  /* ── HELP PANEL ── */
+  .help-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .help-section:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .help-section h3 {
+    font-size: 15px; font-weight: 600;
+    color: var(--text); margin-bottom: 10px;
+  }
+
+  .help-section p {
+    font-size: 13px; color: var(--text2);
+    line-height: 1.6; margin-bottom: 8px;
+  }
+
+  .help-step {
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 10px;
+  }
+
+  .help-step-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent-text);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  .help-step-text {
+    font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1;
+  }
+
+  .help-step-text strong { color: var(--text); font-weight: 600; }
+
+  .help-code {
+    background: var(--bg); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 10px 14px;
+    font-family: monospace; font-size: 12px;
+    color: var(--accent-text); margin: 8px 0;
+    word-break: break-all; line-height: 1.5;
+  }
+
+  .help-tip {
+    background: #fffbeb; border: 1px solid #fde68a;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; color: #92400e;
+    margin-top: 10px; line-height: 1.5;
+  }
+
+  .help-safe {
+    background: #f0fdf4; border: 1px solid #86efac;
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; color: #166534;
+    margin-top: 10px; line-height: 1.5;
+  }
+
+  .help-link {
+    color: var(--accent); text-decoration: none; font-weight: 500;
+  }
+
+  .help-update-btn {
+    width: 100%; margin-top: 12px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 8px;
+    padding: 11px; font-family: var(--font);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+
+  .help-update-btn:active { opacity: 0.85; }
+
   /* ── CURRICULUM EDITOR ── */
   .form-label {
     display: block; font-size: 12px; font-weight: 600;
@@ -691,6 +790,14 @@
 
     <div style="display:flex;flex-direction:column;gap:14px">
       <div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <label class="form-label">Anthropic API key</label>
+          <button onclick="openHelp('apikey')" style="background:none;border:none;color:var(--accent);font-family:var(--font);font-size:11px;cursor:pointer;font-weight:500;padding:0">How to get & rotate ↗</button>
+        </div>
+        <input class="form-input" id="as-apikey" type="password" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="off">
+        <div style="font-size:11px;color:var(--text3);margin-top:5px">Get yours free at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a>. Stored locally only, never sent anywhere except Anthropic.</div>
+      </div>
+      <div>
         <label class="form-label">Subject name</label>
         <input class="form-input" id="as-name" type="text" placeholder="e.g. JavaScript, React, SQL...">
       </div>
@@ -765,6 +872,18 @@
   </div>
 </div>
 
+<!-- CHANGELOG PANEL -->
+<div class="panel-overlay" id="changelog-overlay" onclick="closeChangelog(event)">
+  <div class="panel" style="max-height:90vh;overflow-y:auto">
+    <div class="panel-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="panel-title" style="margin-bottom:0">Change history</div>
+      <button class="panel-btn" onclick="closeChangelog()">Close</button>
+    </div>
+    <div id="changelog-content"></div>
+  </div>
+</div>
+
 <!-- SETTINGS PANEL -->
 <div class="panel-overlay" id="settings-overlay" onclick="closeSettings(event)">
   <div class="panel">
@@ -797,11 +916,55 @@
 
     <div class="panel-row">
       <div>
+        <div class="panel-row-label">Anthropic API key</div>
+        <div class="panel-row-sub">Rotate or update your key</div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openHelp('apikey')">How to</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
         <div class="panel-row-label">Phase 2–4</div>
         <div class="panel-row-sub">Coming soon</div>
       </div>
       <button class="panel-btn" onclick="showToast('Phases 2–4 coming soon! 🚀')">Preview</button>
     </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">About this app</div>
+        <div class="panel-row-sub">What it does · built by Claude</div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openHelp('about')">View</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Help & security guide</div>
+        <div class="panel-row-sub">API key safety, Supabase, GitHub</div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openHelp('security')">View</button>
+    </div>
+
+    <div class="panel-row">
+      <div>
+        <div class="panel-row-label">Change history</div>
+        <div class="panel-row-sub" id="settings-version"></div>
+      </div>
+      <button class="panel-btn" onclick="closeSettings();openChangelog()">View</button>
+    </div>
+  </div>
+</div>
+
+<!-- HELP PANEL -->
+<div class="panel-overlay" id="help-overlay" onclick="closeHelp(event)">
+  <div class="panel" style="max-height:90vh;overflow-y:auto">
+    <div class="panel-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div class="panel-title" style="margin-bottom:0" id="help-title">Help</div>
+      <button class="panel-btn" onclick="closeHelp()">Close</button>
+    </div>
+    <div id="help-content"></div>
   </div>
 </div>
 
@@ -949,6 +1112,48 @@ const PHASES = [{
 const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
 const SUPABASE_USER = 'roadmap';
+const APP_VERSION   = '3.02';
+
+// ── CHANGELOG ──
+// Add a new entry here with every update
+const CHANGELOG = [
+  {
+    version: '3.00',
+    date: '2026-04-27',
+    changes: [
+      'Initial release — Phase 1 day-by-day checklist with 4 weeks of tasks',
+      'Supabase cross-device sync for progress and notes',
+      'Dynamic scheduling — completed tasks pull next category task forward',
+      'Clean light Notion-style theme with Inter font',
+      'Filter chips by skill tag',
+      'Add Subject panel — Claude generates full curriculum via API',
+      'Manage subjects — drag to reorder, remove individual tasks',
+      'Schema-resilient persistence by task ID',
+    ]
+  },
+  {
+    version: '3.01',
+    date: '2026-04-27',
+    changes: [
+      'Fixed infinite recursion bug in buildDynamicSchedule override',
+      'Fixed renderWeeks using object reference comparison — now uses phaseIdx/weekIdx integers',
+      'Fixed removedTasks and subjects declared after use — moved to STATE block',
+      'Added Help panel — API key guide, security guide',
+      'Added About section explaining app purpose and Claude authorship',
+      'Added API key rotation guide with live update field',
+      'Added version number (APP_VERSION) displayed in Settings panel',
+    ]
+  },
+  {
+    version: '3.02',
+    date: '2026-04-27',
+    changes: [
+      'Added changelog system — every update saved to Supabase ios_ai_changelog table',
+      'Change history viewable in Settings → View changelog',
+      'Minor version auto-increments with each update',
+    ]
+  },
+];
 
 let sbClient = null;
 let userId = SUPABASE_USER;
@@ -1083,8 +1288,10 @@ async function autoConnect() {
   document.getElementById('settings-user').textContent = userId;
   document.getElementById('settings-sync').textContent =
     syncMode === 'live' ? 'Connected to Supabase' : 'Offline — local only';
+  document.getElementById('settings-version').textContent = 'Current version: v' + APP_VERSION;
   await loadSubjects();
   await loadRemovedTasks();
+  await syncChangelog();
   rebuildFilterChips();
   renderAll();
 }
@@ -1458,6 +1665,7 @@ function openAddSubject() {
   document.getElementById('as-name').value = '';
   document.getElementById('as-context').value = '';
   document.getElementById('as-week').value = '1';
+  document.getElementById('as-apikey').value = localStorage.getItem('anthropic_api_key') || '';
   document.getElementById('as-status').style.display = 'none';
   document.getElementById('as-generate-btn').disabled = false;
   document.getElementById('as-generate-btn').innerHTML = 'Generate schedule with Claude ✨';
@@ -1496,10 +1704,16 @@ async function generateSubject() {
   const name    = document.getElementById('as-name').value.trim();
   const context = document.getElementById('as-context').value.trim();
   const startWeek = parseInt(document.getElementById('as-week').value) || 1;
+  const apiKey  = document.getElementById('as-apikey').value.trim()
+                  || localStorage.getItem('anthropic_api_key') || '';
   const statusEl = document.getElementById('as-status');
   const btn = document.getElementById('as-generate-btn');
 
   if (!name) { showStatus('Please enter a subject name.', 'error'); return; }
+  if (!apiKey) { showStatus('Please enter your Anthropic API key.', 'error'); return; }
+
+  // Save key locally for convenience
+  localStorage.setItem('anthropic_api_key', apiKey);
 
   // Build tag from name (strip spaces, capitalise)
   const tag = name.replace(/\s+/g, '').slice(0, 12);
@@ -1547,7 +1761,12 @@ Make sure all URLs are real, working URLs.`;
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 4000,
@@ -1788,6 +2007,27 @@ async function restoreAllTasks() {
   showToast('All tasks restored ✓');
 }
 
+// ── CHANGELOG ──
+async function syncChangelog() {
+  if (syncMode !== 'live' || !sbClient) return;
+  try {
+    // Upsert each version entry — idempotent, safe to call on every load
+    const rows = CHANGELOG.map(entry => ({
+      version: entry.version,
+      date: entry.date,
+      changes_json: JSON.stringify(entry.changes),
+      updated_at: new Date().toISOString()
+    }));
+    await sbClient.from('ios_ai_changelog').upsert(rows, { onConflict: 'version' });
+  } catch(e) { console.warn('Changelog sync failed:', e.message); }
+}
+
+async function loadChangelog() {
+  // Always use the local CHANGELOG constant as source of truth
+  // Supabase is used as a persistent record, not as the display source
+  return CHANGELOG;
+}
+
 // ── FILTER CHIPS ──
 function rebuildFilterChips() {
   const scroll = document.querySelector('.filter-scroll');
@@ -1816,6 +2056,260 @@ function injectSubjectStyles() {
       document.head.appendChild(style);
     }
   });
+}
+
+// ── CHANGELOG UI ──
+function openChangelog() {
+  const el = document.getElementById('changelog-content');
+  // Render newest first
+  const sorted = [...CHANGELOG].reverse();
+  el.innerHTML = sorted.map((entry, i) => `
+    <div class="changelog-entry">
+      <div class="changelog-version">
+        <span class="changelog-version-num">v${entry.version}</span>
+        ${i === 0 ? '<span class="changelog-version-badge">Current</span>' : ''}
+        <span class="changelog-date">${entry.date}</span>
+      </div>
+      ${entry.changes.map(c => `
+        <div class="changelog-item">
+          <div class="changelog-bullet"></div>
+          <span>${c}</span>
+        </div>`).join('')}
+    </div>
+  `).join('');
+  document.getElementById('changelog-overlay').classList.add('open');
+}
+
+function closeChangelog(e) {
+  if (!e || e.target === document.getElementById('changelog-overlay'))
+    document.getElementById('changelog-overlay').classList.remove('open');
+}
+
+// ── HELP PANEL ──
+const HELP_CONTENT = {
+  about: {
+    title: 'About this app',
+    html: `
+      <div class="help-section">
+        <h3>What this app does</h3>
+        <p>This is a personal learning roadmap tracker built specifically for your journey into iOS development, AI, PyTorch, and touch typing.</p>
+        <div class="help-step">
+          <div class="help-step-num">☑</div>
+          <div class="help-step-text"><strong>Day-by-day schedule</strong> — a structured 4-week Phase 1 plan with tasks across Swift, AI, PyTorch, Python, and Typing</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">⚡</div>
+          <div class="help-step-text"><strong>Dynamic scheduling</strong> — complete a task early and the next task in that category automatically moves up to fill the slot</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">☁</div>
+          <div class="help-step-text"><strong>Cross-device sync</strong> — progress and notes are saved to Supabase and sync instantly across your Mac, iPhone, and any other device</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✨</div>
+          <div class="help-step-text"><strong>AI curriculum builder</strong> — add any new subject (e.g. JavaScript, React, SQL) and Claude generates a full day-by-day schedule for it using your Anthropic API key</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">📋</div>
+          <div class="help-step-text"><strong>Full control</strong> — remove individual tasks, reorder subjects, add notes to any task, and restore anything you've removed</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Created by Claude</h3>
+        <p>This entire app — every line of code, every feature, every design decision — was created by <strong>Claude</strong> (Anthropic's AI assistant) through a conversation with you.</p>
+        <p>No manual coding was involved. The app was built iteratively over a single conversation, evolving from a simple checklist into a full dynamic learning platform.</p>
+        <div class="help-safe">✓ Claude wrote 100% of the HTML, CSS, JavaScript, scheduling engine, Supabase integration, and curriculum generator</div>
+      </div>
+
+      <div class="help-section">
+        <h3>How to modify or extend this app</h3>
+        <p>To make any changes — add features, fix bugs, change the design, add new phases — you need to use the same Claude project where this was built.</p>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Open <a class="help-link" href="https://claude.ai" target="_blank">claude.ai</a> and go to your learning roadmap project</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Describe what you want to change in plain English — e.g. <em>"add a streak counter"</em> or <em>"change the colour scheme to dark mode"</em></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Claude will edit the file and give you a new version to download and push to GitHub</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">4</div>
+          <div class="help-step-text">Push to GitHub Pages — the change is live on all your devices within 2 minutes</div>
+        </div>
+        <div class="help-tip">💡 The full conversation history gives Claude context about every decision made. Starting a new conversation works too — just share the current HTML file as a starting point.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Version</h3>
+        <p style="color:var(--text3);font-size:12px">iOS & AI Learning Roadmap · v<span class="app-version-display"></span> · Built with Claude Sonnet · April 2026</p>
+      </div>
+    `
+  },
+  apikey: {
+    title: 'API key — how to get, rotate & stay safe',
+    html: `
+      <div class="help-section">
+        <h3>Getting your Anthropic API key</h3>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to <a class="help-link" href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> and sign in (or create a free account)</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Click <strong>API Keys</strong> in the left sidebar</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Click <strong>Create Key</strong> → give it a name like <em>learning-roadmap</em></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">4</div>
+          <div class="help-step-text">Copy the key immediately — <strong>you only see it once</strong></div>
+        </div>
+        <div class="help-tip">💡 Set a spending limit at console.anthropic.com → Settings → Limits. £5/month is plenty for generating dozens of subject schedules.</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Rotating your key (if you suspect it was compromised)</h3>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to <a class="help-link" href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → <strong>API Keys</strong></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Click the <strong>trash icon</strong> next to your old key — it stops working immediately</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Click <strong>Create Key</strong> → copy the new key</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">4</div>
+          <div class="help-step-text">Paste your new key below and tap Update — it saves to this device's local storage</div>
+        </div>
+        <div style="margin-top:12px">
+          <input class="form-input" id="help-new-apikey" type="password" placeholder="Paste new sk-ant-... key here" autocomplete="off">
+          <button class="help-update-btn" onclick="updateApiKey()">Update API key on this device</button>
+        </div>
+        <div class="help-step" style="margin-top:14px">
+          <div class="help-step-num">5</div>
+          <div class="help-step-text">Repeat on each device — open the roadmap, tap <strong>⚙ Settings → API key → How to</strong>, paste the new key and tap Update</div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Is my key safe?</h3>
+        <div class="help-safe">✓ Your key is stored only in this browser's local storage — not in GitHub, not in Supabase, not in the HTML file</div>
+        <div class="help-step" style="margin-top:12px">
+          <div class="help-step-num">?</div>
+          <div class="help-step-text">To verify the HTML file on GitHub is clean, run this in your terminal:</div>
+        </div>
+        <div class="help-code">grep -i "sk-ant" ios_learning_roadmap_v3.html</div>
+        <p>If it returns nothing, your key is not in the file. ✓</p>
+      </div>
+    `
+  },
+  security: {
+    title: 'Security & privacy guide',
+    html: `
+      <div class="help-section">
+        <h3>What is stored where</h3>
+        <div class="help-step">
+          <div class="help-step-num">📱</div>
+          <div class="help-step-text"><strong>This device only:</strong> Anthropic API key, cached progress</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">☁</div>
+          <div class="help-step-text"><strong>Supabase:</strong> Task progress (done/undone), notes, completion timestamps, subject curricula</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">⌥</div>
+          <div class="help-step-text"><strong>GitHub:</strong> Only the HTML app code — no keys, no personal data</div>
+        </div>
+        <div class="help-safe">✓ No passwords or sensitive data ever touch GitHub</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Can anyone modify your GitHub file?</h3>
+        <p>No — only you can push to your repository. To add extra protection:</p>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to your GitHub repo → <strong>Settings → Branches</strong></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Add a rule for <strong>main</strong> branch</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">3</div>
+          <div class="help-step-text">Tick <strong>Require pull request reviews before merging</strong></div>
+        </div>
+      </div>
+
+      <div class="help-section">
+        <h3>Supabase security</h3>
+        <p>Your Supabase anon key is in the HTML file. Since the data in your table (task progress and notes) is not sensitive, this is acceptable. For extra protection:</p>
+        <div class="help-step">
+          <div class="help-step-num">1</div>
+          <div class="help-step-text">Go to <a class="help-link" href="https://supabase.com" target="_blank">supabase.com</a> → your project → <strong>Authentication → Policies</strong></div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">2</div>
+          <div class="help-step-text">Enable <strong>Row Level Security</strong> on the <em>ios_ai_progress</em> table — this prevents anyone with your anon key from reading other users' data</div>
+        </div>
+        <div class="help-code">ALTER TABLE ios_ai_progress ENABLE ROW LEVEL SECURITY;</div>
+      </div>
+
+      <div class="help-section">
+        <h3>Quick security checklist</h3>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Set an Anthropic spending limit at console.anthropic.com → Settings → Limits</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Enable branch protection on GitHub main branch</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Enable Row Level Security in Supabase</div>
+        </div>
+        <div class="help-step">
+          <div class="help-step-num">✓</div>
+          <div class="help-step-text">Rotate your Anthropic key every few months</div>
+        </div>
+      </div>
+    `
+  }
+};
+
+function openHelp(section) {
+  const content = HELP_CONTENT[section] || HELP_CONTENT.about;
+  document.getElementById('help-title').textContent = content.title;
+  document.getElementById('help-content').innerHTML = content.html;
+  // Inject version number wherever needed
+  document.querySelectorAll('.app-version-display').forEach(el => el.textContent = APP_VERSION);
+  document.getElementById('help-overlay').classList.add('open');
+}
+
+function closeHelp(e) {
+  if (!e || e.target === document.getElementById('help-overlay'))
+    document.getElementById('help-overlay').classList.remove('open');
+}
+
+function updateApiKey() {
+  const key = document.getElementById('help-new-apikey').value.trim();
+  if (!key) { showToast('Please paste your new API key first'); return; }
+  if (!key.startsWith('sk-ant-')) { showToast('That doesn\'t look like a valid Anthropic key'); return; }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('help-new-apikey').value = '';
+  showToast('API key updated on this device ✓');
+  closeHelp();
 }
 
 // ══════════════════════════════════════════
