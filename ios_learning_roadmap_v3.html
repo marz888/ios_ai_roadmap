@@ -6,7 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f7f7f5">
-<title>iOS & AI Learning Roadmap (3.09)</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<title>iOS & AI Learning Roadmap (3.10)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1081,7 +1085,7 @@ let PHASES = []; // populated on load
 const SUPABASE_URL  = 'https://ffgsetxqsiforszssfra.supabase.co';
 const SUPABASE_KEY  = 'sb_publishable_aNoSQI7gy2dxYr5eqLV2gw_YXL5lEVJ';
 const SUPABASE_USER = 'roadmap';
-const APP_VERSION   = '3.09';
+const APP_VERSION   = '3.10';
 
 // ── CHANGELOG ──
 // Add a new entry here with every update
@@ -1120,6 +1124,14 @@ const CHANGELOG = [
       'Added changelog system — every update saved to Supabase ios_ai_changelog table',
       'Change history viewable in Settings → View changelog',
       'Minor version auto-increments with each update',
+    ]
+  },
+  {
+    version: '3.10',
+    date: '2026-04-27',
+    changes: [
+      'Added favicon — AI brain icon appears in browser tab and iPhone home screen',
+      'Added apple-touch-icon for iOS Add to Home Screen',
     ]
   },
   {
